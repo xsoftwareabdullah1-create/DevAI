@@ -1,109 +1,95 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#0B1020"
-    android:fillViewport="true">
+    android:orientation="vertical"
+    android:background="#0B1020">
+
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:padding="18dp">
+        android:paddingStart="20dp"
+        android:paddingEnd="20dp"
+        android:paddingTop="18dp"
+        android:paddingBottom="12dp">
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="DevAI"
             android:textColor="#EAF2FF"
-            android:textSize="30sp"
+            android:textSize="27sp"
             android:textStyle="bold" />
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="2dp"
-            android:text="Model · Dev Orus 1.1"
+            android:text="Dev Orus 1.1"
             android:textColor="#65D6C4"
             android:textSize="15sp"
             android:textStyle="bold" />
         <TextView
+            android:id="@+id/status"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Original AI research · Offline · Java + C++"
+            android:layout_marginTop="4dp"
+            android:text="OFFLINE · Loading knowledge…"
             android:textColor="#8FA8C8"
-            android:textSize="13sp" />
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="18dp"
-            android:text="MILESTONE 3 · TINY DECODER-ONLY TRANSFORMER"
-            android:textColor="#65D6C4"
-            android:textSize="13sp"
-            android:textStyle="bold" />
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:text="Train a small byte-level BPE tokenizer on your text, then encode a sample and run one local Transformer forward pass. The network starts with random weights; it has not learned language."
-            android:textColor="#C5D2E5"
-            android:textSize="14sp" />
-        <EditText
-            android:id="@+id/trainingText"
-            android:layout_width="match_parent"
-            android:layout_height="130dp"
-            android:layout_marginTop="12dp"
-            android:gravity="top|start"
-            android:hint="Paste a small training corpus for BPE..."
-            android:inputType="textMultiLine"
-            android:minLines="4"
-            android:textColor="#FFFFFF"
-            android:textColorHint="#8190A8"
-            android:backgroundTint="#65D6C4" />
-        <Button
-            android:id="@+id/trainButton"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Train tokenizer (128 merges)" />
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
-            android:text="Input sample"
-            android:textColor="#EAF2FF"
-            android:textStyle="bold" />
-        <EditText
-            android:id="@+id/inputText"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:hint="Enter text to tokenize..."
-            android:inputType="textMultiLine"
-            android:minLines="2"
-            android:textColor="#FFFFFF"
-            android:textColorHint="#8190A8"
-            android:backgroundTint="#65D6C4" />
-        <Button
-            android:id="@+id/encodeButton"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Encode to token IDs" />
-        <Button
-            android:id="@+id/decodeButton"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Decode last token IDs" />
-        <Button
-            android:id="@+id/forwardButton"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Run tiny Transformer forward pass" />
-        <TextView
-            android:id="@+id/outputText"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="14dp"
-            android:background="#151E32"
-            android:padding="14dp"
-            android:textColor="#EAF2FF"
-            android:textSize="14sp"
-            android:textIsSelectable="true" />
+            android:textSize="12sp" />
     </LinearLayout>
-</ScrollView>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="#26344B" />
+
+    <ScrollView
+        android:id="@+id/chatScroll"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:fillViewport="true"
+        android:paddingStart="14dp"
+        android:paddingEnd="14dp"
+        android:paddingTop="10dp"
+        android:paddingBottom="10dp">
+        <LinearLayout
+            android:id="@+id/messages"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical" />
+    </ScrollView>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="#26344B" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:padding="12dp">
+        <EditText
+            android:id="@+id/composer"
+            android:layout_width="0dp"
+            android:layout_height="52dp"
+            android:layout_weight="1"
+            android:backgroundTint="#65D6C4"
+            android:hint="Message Dev Orus…"
+            android:imeOptions="actionSend"
+            android:inputType="textCapSentences|textMultiLine"
+            android:maxLines="4"
+            android:paddingStart="12dp"
+            android:paddingEnd="12dp"
+            android:textColor="#FFFFFF"
+            android:textColorHint="#8190A8" />
+        <Button
+            android:id="@+id/sendButton"
+            android:layout_width="wrap_content"
+            android:layout_height="52dp"
+            android:layout_marginStart="8dp"
+            android:enabled="false"
+            android:text="Send" />
+    </LinearLayout>
+</LinearLayout>
