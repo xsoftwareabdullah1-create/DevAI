@@ -4,7 +4,7 @@
 
 DevAI is an independently implemented language-model research project. It uses no pretrained model weights and no external AI inference APIs. The current code includes an experimental tokenizer, a small C++ decoder-only Transformer forward pass, and an original multilingual starter corpus.
 
-> **Current status: forward-pass prototype + starter dataset.** The app can train a byte-level BPE tokenizer from supplied text, encode/decode IDs, and run a tiny randomly initialized Transformer. A 198-record multilingual starter corpus now includes everyday-life discussions, advanced multi-turn dialogues, digital literacy, critical thinking and detailed-answer examples—not just school facts. The model has **not** learned this corpus yet and does not produce meaningful chat.
+> **Current status: forward-pass prototype + starter dataset.** The app can train a byte-level BPE tokenizer from supplied text, encode/decode IDs, and run a tiny randomly initialized Transformer. A 198-record multilingual starter corpus now includes everyday-life discussions, advanced multi-turn dialogues, digital literacy, critical thinking and detailed-answer examples—not just school facts. The model has **not** learned this corpus yet and does not produce meaningful chat. A separate 200,000-record conversation-corpus target is documented; it is not yet populated.
 
 ## Implemented
 
@@ -22,7 +22,7 @@ DevAI is an independently implemented language-model research project. It uses n
 
 ## Starter knowledge and casual conversation data
 
-See [data/knowledge/README.md](data/knowledge/README.md) and [seed_knowledge.jsonl](data/knowledge/seed_knowledge.jsonl).
+See [data/knowledge/README.md](data/knowledge/README.md), [seed_knowledge.jsonl](data/knowledge/seed_knowledge.jsonl), and the [200,000-record conversation corpus plan](docs/CONVERSATION_CORPUS_PLAN.md).
 
 The starter records include basic science, geography, mathematics and biology, plus friendly handling of greetings, thanks, jokes, riddles, boredom and playful/nonsensical prompts. The intended behavior is to respond politely to casual questions instead of dismissing them, while not inventing factual answers.
 
@@ -33,7 +33,7 @@ python3 scripts/validate_knowledge_dataset.py
 python3 scripts/prepare_dataset.py --seed 2026
 ```
 
-The starter corpus currently covers English, Hindi and Urdu only, with 66 examples per language. It spans academic facts, everyday life, communication, digital literacy, misinformation, AI limitations, money basics, complex discussions, causal reasoning, systems thinking, decision-making, conflict repair and evaluating sources across basic, intermediate and advanced levels. It is a small original seed set, not a comprehensive general-knowledge library. More languages and carefully reviewed, properly licensed data need to be added gradually.
+The current starter corpus covers English, Hindi and Urdu only, with 66 total records per language. The separate conversation expansion target is 200,000 records: 66,667 English, 66,667 Hindi and 66,666 Urdu. It spans academic facts, everyday life, communication, digital literacy, misinformation, AI limitations, money basics, complex discussions, causal reasoning, systems thinking, decision-making, conflict repair and evaluating sources across basic, intermediate and advanced levels. It is a small original seed set, not a comprehensive general-knowledge library. More languages and carefully reviewed, properly licensed data need to be added gradually.
 
 ## Tiny Android configuration
 
