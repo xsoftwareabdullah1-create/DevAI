@@ -1,84 +1,84 @@
-# First Trainable DevAI Model
+# DevAI On-Device Model Integration
 
-## Purpose
+## Decision
 
-Replace the current forward-pass-only demonstration with a genuinely trainable, randomly initialized language model. This is a staged engineering target, not a claim that DevAI already has ChatGPT-level ability.
+Use an existing open-weight instruction model instead of trying to train a useful language model from random initialization on a phone.
 
-## Non-negotiable model integrity
+## Model choice
 
-- Initialize every trainable parameter from a documented random seed.
-- Do not import pretrained weights, model checkpoints, teacher logits, or external AI APIs.
-- Train only on data with documented provenance and permission to use it.
-- Keep training and validation examples separate; never report training loss as validation quality.
-- Save the model configuration, tokenizer version, seed, optimizer settings, dataset manifest/hash, step count, and metrics beside every checkpoint.
-- Report limitations and measured results; never call a random forward pass a trained model.
+- Upstream: Qwen/Qwen3-0.6B
+- Upstream license: Apache-2.0 (verify the exact model card and include its notices in the app/release).
+- Initial deployment format: GGUF Q4_K_M.
+- Expected model file size: approximately 0.48 GB for the referenced conversion; exact artifact, source revision, and SHA-256 must be pinned before release.
+- Runtime: llama.cpp.
+- Android target: arm64-v8a, CPU first, short initial context (e.g. 2048 tokens) to control memory.
 
-## First baseline target
+The Qwen3 model is a pretrained model, not a DevAI-created or scratch-trained model. Its use is an intentional change from the earlier no-pretrained-weights experiment.
 
-Use the existing decoder-only Transformer as the architecture starting point, but add the missing training system:
+## Why this choice
 
-- Vocabulary: 512 tokens initially (must match the tokenizer/model vocabulary exactly).
-- Width: 32.
-- Attention heads: 4.
-- Transformer layers: 1.
-- SwiGLU width: 64.
-- Context length: 64 tokens initially.
-- Approximate parameter budget: about 43,000 parameters for the current untied-embedding layout.
-- Objective: next-token cross-entropy.
-- Optimizer: AdamW with configurable learning rate, weight decay, gradient clipping, and deterministic seed.
-- Training: shuffled mini-batches, padding/masking where required, periodic validation, and early-stop/checkpoint controls.
-- Runtime: first validate a reproducible host-side CPU training run; then port the same math and checkpoint format to the Android C++ runtime. Do not assume a phone can sustain a long training run until measured.
+The existing project has only a forward-pass-only Transformer with random weights and no backpropagation, optimizer, or checkpoint training loop. Integrating a compact instruction model is a much more realistic route to an actual offline chat experience than pretending the tiny prototype has learned language.
 
-This is deliberately a tiny research baseline. It is not comparable to ChatGPT in knowledge, reasoning, or reliability. A small parameter count does not imply useful conversation ability.
+## Android architecture
 
-## Required implementation sequence
+```
+Java/XML Chat UI
+    |
+    | JNI calls
+    v
+C++ DevAI bridge
+    |
+    v
+llama.cpp inference engine
+    |
+    v
+Qwen3-0.6B GGUF (app-private storage)
+```
 
-1. **Data contract**
-   - Create a conversation-only training manifest from reviewed JSONL records.
-   - Preserve language labels (English, Hindi, Urdu, and Hinglish only when explicitly labeled).
-   - Deduplicate exact and near-duplicate records.
-   - Group translated variants and related dialogue threads before splitting.
-   - Keep validation records completely out of optimizer batches.
-   - Record provenance and licensing for every added source.
-2. **Tokenizer and sequence preparation**
-   - Persist and reload the exact tokenizer vocabulary/merges.
-   - Verify that every token ID is within the configured model vocabulary.
-   - Add BOS/EOS and conversation-role boundaries with a documented format.
-   - Create deterministic packed sequences and train/validation splits.
-3. **Training math**
-   - Implement cross-entropy, backward gradients through all trainable layers, AdamW, gradient clipping, and optimizer-state handling.
-   - Add finite-value checks and gradient tests.
-   - Prove that a tiny synthetic next-token task overfits and that loss decreases.
-4. **Checkpointing**
-   - Save/load all model weights and required configuration atomically.
-   - Reject incompatible vocabulary, architecture, or checkpoint versions.
-   - Test exact output reproducibility after save/reload.
-5. **Evaluation**
-   - Report train and validation loss separately, token count, steps, elapsed time, and parameter count.
-   - Add held-out prompt tests for greetings, casual chat, factual explanations, follow-ups, corrections, Hindi/English code-switching, and uncertainty.
-   - Do not describe fluent or factual conversation ability until these tests support it.
-6. **Android chat integration**
-   - Replace the current developer-test landing screen with a chat-first Java/XML interface.
-   - Keep training controls and metrics in a separate Developer Lab.
-   - Load a trained checkpoint instead of randomizing weights on each JNI call.
-   - Generate autoregressively with bounded context and cancellation; keep the UI responsive.
-   - Clearly display when no trained checkpoint exists.
+- Keep the interface in Java/XML; do not migrate the app to Kotlin.
+- Build llama.cpp with Android NDK for arm64-v8a.
+- Use a background executor/thread for generation; never run inference on the UI thread.
+- Stream generated text to the UI in small chunks.
+- Support stop/cancel and release model/context resources when appropriate.
+- Store chat history locally; construct the correct Qwen3 chat template for each turn.
+- Download or import the model once, verify SHA-256, then allow offline inference.
+- Do not bundle a roughly half-gigabyte model inside the APK; ship it as a separate model download/import.
 
-## Dataset reality at plan creation
+## Model download and integrity
 
-The repository currently has a 198-record starter corpus, including 60 conversation records. The separate 200,000-conversation-record goal is a plan only; those 200,000 records do not yet exist. The starter set is useful for pipeline tests, not sufficient for training a useful open-domain assistant. Do not pad it with duplicated, templated, or fabricated records to make the count look larger.
+Before enabling a model download in a release build:
+1. Select the exact GGUF repository and filename.
+2. Pin an immutable upstream revision.
+3. Record exact byte size and SHA-256.
+4. Verify the file hash after download before loading.
+5. Include original model attribution, Apache-2.0 license text, and conversion attribution where required.
+6. Never silently substitute a different quantization or file.
 
-## Acceptance gates
+## Memory and device constraints
 
-A milestone is complete only when all relevant evidence is available:
+A 0.48 GB file does not mean 0.48 GB total RAM usage. Runtime memory includes model tensors, context/KV cache, inference buffers, Android, and other running apps. Start with CPU inference and a 2048-token context; measure actual peak memory, generation speed, temperature, and battery on the Redmi 9 Power. If it struggles, reduce context and concurrency before considering a smaller quantization.
 
-- Native and host tests pass.
-- A synthetic task demonstrates gradients and decreasing loss.
-- A reproducible real-corpus training run completes and writes a checkpoint.
-- Reloaded checkpoint produces identical logits for a fixed input.
-- Held-out validation metrics are reported.
-- Android build succeeds and runtime is checked on the target device before claiming device compatibility.
+## Acceptance tests
 
-## What this does not promise
+- Model file downloads/imports and SHA-256 verification rejects corrupted files.
+- llama.cpp loads the pinned Qwen3 GGUF on arm64 Android.
+- Basic English, Hindi, and Hinglish prompts produce non-empty generated text.
+- Multi-turn chat includes prior messages within the configured context.
+- Stop button cancels generation without freezing the UI.
+- Model unload and app lifecycle do not leak native resources.
+- No network calls occur during inference after the model is installed.
+- Measure and report load time, tokens/second, peak memory, and thermal behavior on the actual target phone.
+- Build and install the APK; do not claim physical-device success based only on CI.
 
-The first model will be a small experimental language model. It will not match ChatGPT, know every topic, or reliably answer arbitrary questions. Meaningful capability depends on architecture, data quality and scale, training compute, and evaluation—not just adding a large number of text records.
+## Fine-tuning later
+
+The first goal is to run the pretrained model correctly. Fine-tuning is a separate later milestone and requires:
+- A reviewed, properly licensed dataset.
+- A supported training method and compatible checkpoint format.
+- Suitable compute outside a mid-range phone if necessary.
+- Held-out evaluation to check whether fine-tuning improves the desired behaviors.
+- Clear attribution that the base model is Qwen3 and DevAI's fine-tuning data/adapters are separate.
+
+## Honest limitations
+
+Qwen3-0.6B is a small model. It can answer many ordinary prompts, but it will still hallucinate, misunderstand some language, and perform poorly on harder reasoning tasks. It is not ChatGPT-level. Offline use begins only after the model file is downloaded or imported.
