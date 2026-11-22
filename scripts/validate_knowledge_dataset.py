@@ -50,6 +50,25 @@ def main() -> int:
             errors.append(f"line {line_number}: unsupported starter language {item['language']!r}")
         if "response_style" in item and item["response_style"] not in {"concise", "detailed"}:
             errors.append(f"line {line_number}: response_style must be concise or detailed")
+        if "context" in item:
+            context = item["context"]
+            if item["kind"] != "conversation":
+                errors.append(f"line {line_number}: context is only valid for conversation records")
+            if not isinstance(context, list) or not context or len(context) > 12:
+                errors.append(f"line {line_number}: context must be a non-empty list of at most 12 messages")
+            else:
+                expected_role = "user"
+                for message_index, message in enumerate(context, start=1):
+                    if not isinstance(message, dict) or set(message) != {"role", "content"}:
+                        errors.append(f"line {line_number}: context message {message_index} must contain role and content only")
+                        continue
+                    if message["role"] != expected_role:
+                        errors.append(f"line {line_number}: context message {message_index} must have role {expected_role!r}")
+                    if not isinstance(message["content"], str) or not message["content"].strip():
+                        errors.append(f"line {line_number}: context message {message_index} content must be non-empty text")
+                    expected_role = "assistant" if expected_role == "user" else "user"
+                if context[-1].get("role") != "assistant":
+                    errors.append(f"line {line_number}: context must end with an assistant message before the current prompt")
         if not isinstance(item["tags"], list) or not item["tags"] or not all(
             isinstance(tag, str) and tag.strip() for tag in item["tags"]
         ):
