@@ -1,72 +1,96 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:padding="18dp"
-    android:background="#0B1020">
-
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="DevAI"
-        android:textColor="#EAF2FF"
-        android:textSize="28sp"
-        android:textStyle="bold" />
-
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Original AI · Offline · Native C++ core"
-        android:textColor="#8FA8C8"
-        android:textSize="13sp" />
-
-    <TextView
-        android:id="@+id/statusText"
+    android:background="#0B1020"
+    android:fillViewport="true">
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:paddingTop="18dp"
-        android:text="MILESTONE 1\nNative byte-tokenizer bridge is ready to test.\nTransformer training is not implemented yet."
-        android:textColor="#65D6C4"
-        android:textSize="14sp" />
-
-    <EditText
-        android:id="@+id/inputText"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="18dp"
-        android:minLines="2"
-        android:hint="Enter text to encode..."
-        android:textColor="#FFFFFF"
-        android:textColorHint="#8190A8"
-        android:backgroundTint="#65D6C4" />
-
-    <Button
-        android:id="@+id/encodeButton"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Encode text to byte IDs" />
-
-    <Button
-        android:id="@+id/decodeButton"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Decode last byte IDs" />
-
-    <ScrollView
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_marginTop="12dp"
-        android:layout_weight="1"
-        android:background="#151E32">
-
+        android:orientation="vertical"
+        android:padding="18dp">
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="DevAI"
+            android:textColor="#EAF2FF"
+            android:textSize="30sp"
+            android:textStyle="bold" />
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Original AI research · Offline · Java + C++"
+            android:textColor="#8FA8C8"
+            android:textSize="13sp" />
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="18dp"
+            android:text="MILESTONE 2 · BYTE-LEVEL BPE TOKENIZER"
+            android:textColor="#65D6C4"
+            android:textSize="13sp"
+            android:textStyle="bold" />
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="Paste a small training corpus. DevAI learns frequent adjacent byte-pair merges. This trains the tokenizer only, not neural-network weights."
+            android:textColor="#C5D2E5"
+            android:textSize="14sp" />
+        <EditText
+            android:id="@+id/trainingText"
+            android:layout_width="match_parent"
+            android:layout_height="150dp"
+            android:layout_marginTop="12dp"
+            android:gravity="top|start"
+            android:hint="Paste sample text for tokenizer training..."
+            android:inputType="textMultiLine"
+            android:minLines="5"
+            android:textColor="#FFFFFF"
+            android:textColorHint="#8190A8"
+            android:backgroundTint="#65D6C4" />
+        <Button
+            android:id="@+id/trainButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Train tokenizer (128 merges)" />
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:text="Try encoding text"
+            android:textColor="#EAF2FF"
+            android:textStyle="bold" />
+        <EditText
+            android:id="@+id/inputText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:hint="Enter text to tokenize..."
+            android:inputType="textMultiLine"
+            android:minLines="2"
+            android:textColor="#FFFFFF"
+            android:textColorHint="#8190A8"
+            android:backgroundTint="#65D6C4" />
+        <Button
+            android:id="@+id/encodeButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Encode to token IDs" />
+        <Button
+            android:id="@+id/decodeButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Decode last token IDs" />
         <TextView
             android:id="@+id/outputText"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:padding="12dp"
+            android:layout_marginTop="14dp"
+            android:background="#151E32"
+            android:padding="14dp"
             android:textColor="#EAF2FF"
             android:textSize="14sp"
             android:textIsSelectable="true" />
-    </ScrollView>
-</LinearLayout>
+    </LinearLayout>
+</ScrollView>
