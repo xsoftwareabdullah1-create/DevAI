@@ -26,7 +26,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="18dp"
-            android:text="MILESTONE 2 · BYTE-LEVEL BPE TOKENIZER"
+            android:text="MILESTONE 3 · TINY DECODER-ONLY TRANSFORMER"
             android:textColor="#65D6C4"
             android:textSize="13sp"
             android:textStyle="bold" />
@@ -34,18 +34,18 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
-            android:text="Paste a small training corpus. DevAI learns frequent adjacent byte-pair merges. This trains the tokenizer only, not neural-network weights."
+            android:text="Train a small byte-level BPE tokenizer on your text, then encode a sample and run one local Transformer forward pass. The network starts with random weights; it has not learned language."
             android:textColor="#C5D2E5"
             android:textSize="14sp" />
         <EditText
             android:id="@+id/trainingText"
             android:layout_width="match_parent"
-            android:layout_height="150dp"
+            android:layout_height="130dp"
             android:layout_marginTop="12dp"
             android:gravity="top|start"
-            android:hint="Paste sample text for tokenizer training..."
+            android:hint="Paste a small training corpus for BPE..."
             android:inputType="textMultiLine"
-            android:minLines="5"
+            android:minLines="4"
             android:textColor="#FFFFFF"
             android:textColorHint="#8190A8"
             android:backgroundTint="#65D6C4" />
@@ -58,7 +58,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
-            android:text="Try encoding text"
+            android:text="Input sample"
             android:textColor="#EAF2FF"
             android:textStyle="bold" />
         <EditText
@@ -82,6 +82,11 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="Decode last token IDs" />
+        <Button
+            android:id="@+id/forwardButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Run tiny Transformer forward pass" />
         <TextView
             android:id="@+id/outputText"
             android:layout_width="match_parent"
