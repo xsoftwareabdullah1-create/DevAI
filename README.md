@@ -41,6 +41,10 @@ python3 scripts/prepare_dataset.py --seed 2026
 
 The current starter corpus covers English, Hindi and Urdu only, with 66 total records per language. The separate conversation expansion target is 200,000 records: 66,667 English, 66,667 Hindi and 66,666 Urdu. It spans academic facts, everyday life, communication, digital literacy, misinformation, AI limitations, money basics, complex discussions, causal reasoning, systems thinking, decision-making, conflict repair and evaluating sources across basic, intermediate and advanced levels. It is a small original seed set, not a comprehensive general-knowledge library. More languages and carefully reviewed, properly licensed data need to be added gradually.
 
+## First trainable model
+
+The next milestone is a genuinely trainable, randomly initialized model—not a tokenizer-only demo. The [first trainable model plan](docs/FIRST_TRAINABLE_MODEL.md) defines a roughly 43K-parameter baseline and the required backpropagation, AdamW, validation, checkpointing, and Android chat integration. This work is not implemented yet; the current Transformer still has random weights and no training loop. The 200,000-conversation target is also a plan, not an existing dataset.
+
 ## Tiny Android configuration
 
 The UI demo uses a deliberately small configuration: vocabulary 512, width 32, 4 attention heads, 1 layer, SwiGLU width 64, maximum sequence length 64. Parameters are randomly initialized each time the demo runs. This configuration validates tensor flow, not capability or quality.
