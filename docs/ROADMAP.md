@@ -23,19 +23,32 @@
 
 This is a forward-pass reference implementation only. It does not learn from data, persist weights, or generate meaningful chat.
 
-## Milestone 4 — Training engine
+## Milestone 4 — Beginner knowledge and conversation seed corpus
+- [x] Add original beginner general-knowledge Q&A in English, Hindi and Urdu
+- [x] Add friendly casual conversation examples: greetings, thanks, jokes, riddles, boredom and playful nonsense
+- [x] Define UTF-8 JSONL record format with IDs, language, level, tags and provenance
+- [x] Add a Python standard-library dataset validator
+- [x] Run dataset validation in native CI
+- [ ] Expand to additional languages in reviewed, correctly labeled batches
+- [ ] Expand beginner facts, then intermediate and advanced curriculum levels
+- [ ] Add reviewed sources and license metadata for future third-party datasets
+
+The 60 records are starter examples only. They do not change model weights until a training pipeline exists. Casual prompts should be handled politely and playfully when appropriate, not labeled as stupid; unclear prompts should invite clarification.
+
+## Milestone 5 — Training engine
 - [ ] Next-token cross-entropy loss
 - [ ] Backpropagation and gradient checks
 - [ ] AdamW and gradient clipping
 - [ ] Mini-batch training and validation loop
 - [ ] Checkpoint save/load and resume
 
-## Milestone 5 — Dataset and evaluation
-- [ ] Add licensed local dataset import and provenance records
+## Milestone 6 — Dataset pipeline and evaluation
+- [ ] Add scalable licensed local dataset import and provenance records
 - [ ] Deterministic train/validation split
-- [ ] Report held-out loss and sample-generation quality
+- [ ] Curriculum sampler: beginner → intermediate → advanced
+- [ ] Per-language evaluation and held-out loss reporting
 
-## Milestone 6 — Local chat and Android optimization
+## Milestone 7 — Local chat and Android optimization
 - [ ] Autoregressive sampling after model training
 - [ ] Persist model checkpoints and tokenizer assets
 - [ ] Profile arm64 CPU, memory, battery and thermals
