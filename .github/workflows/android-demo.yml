@@ -71,13 +71,23 @@ jobs:
       - name: Build Redmi 9 Power compatible APK
         run: gradle --no-daemon :app:assembleDebug
 
-      - name: Verify APK and ABI
+      - name: Verify APK, ABI, and native dependency names
         shell: bash
         run: |
           APK="app/build/outputs/apk/debug/app-debug.apk"
           test -s "$APK"
           "$ANDROID_HOME/build-tools/35.0.0/aapt" dump badging "$APK" | grep -E "package:|sdkVersion:|targetSdkVersion:"
           "$ANDROID_HOME/build-tools/35.0.0/aapt" dump badging "$APK" | grep "native-code: 'arm64-v8a'"
+          unzip -l "$APK" | grep -E 'lib/arm64-v8a/lib(devai|LiteRtLm)\\.so'
+          READ_ELF="$ANDROID_HOME/ndk/27.2.12479018/toolchains/llvm/prebuilt/linux-x86_64/bin/llvm-readelf"
+          mkdir -p build-apk-check
+          unzip -p "$APK" lib/arm64-v8a/libdevai.so > build-apk-check/libdevai.so
+          "$READ_ELF" -d build-apk-check/libdevai.so | tee build-apk-check/dynamic.txt
+          grep -F 'Shared library: [libLiteRtLm.so]' build-apk-check/dynamic.txt
+          if grep -E 'Shared library: \\[/|Shared library: \\[.*[A-Za-z]:\\\\' build-apk-check/dynamic.txt; then
+            echo "ERROR: libdevai.so contains an absolute native dependency path."
+            exit 1
+          fi
           ls -lh "$APK"
 
       - name: Upload installable demo APK
