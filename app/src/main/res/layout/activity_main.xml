@@ -19,6 +19,14 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginTop="2dp"
+            android:text="Model · Dev Orus 1.1"
+            android:textColor="#65D6C4"
+            android:textSize="15sp"
+            android:textStyle="bold" />
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
             android:text="Original AI research · Offline · Java + C++"
             android:textColor="#8FA8C8"
             android:textSize="13sp" />
