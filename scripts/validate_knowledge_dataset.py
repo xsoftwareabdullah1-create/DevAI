@@ -67,7 +67,7 @@ def main() -> int:
                     if not isinstance(message["content"], str) or not message["content"].strip():
                         errors.append(f"line {line_number}: context message {message_index} content must be non-empty text")
                     expected_role = "assistant" if expected_role == "user" else "user"
-                if context[-1].get("role") != "assistant":
+                if isinstance(context[-1], dict) and context[-1].get("role") != "assistant":
                     errors.append(f"line {line_number}: context must end with an assistant message before the current prompt")
         if not isinstance(item["tags"], list) or not item["tags"] or not all(
             isinstance(tag, str) and tag.strip() for tag in item["tags"]
