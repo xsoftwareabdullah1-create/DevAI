@@ -7,6 +7,7 @@ on:
       - 'app/**'
       - '*.gradle'
       - 'gradle.properties'
+      - 'scripts/**'
       - '.github/workflows/android-demo.yml'
   pull_request:
     paths:
@@ -21,7 +22,7 @@ permissions:
 
 jobs:
   build-debug-apk:
-    name: Build DevAI APK (Redmi 9 Power / arm64-v8a)
+    name: Build Dev Orus 1.1 Gemma APK (arm64-v8a)
     runs-on: ubuntu-latest
     steps:
       - name: Check out source
@@ -58,6 +59,9 @@ jobs:
             "build-tools;35.0.0" \
             "cmake;3.22.1" \
             "ndk;27.2.12479018"
+
+      - name: Prepare verified LiteRT-LM Android runtime
+        run: bash scripts/prepare_litertlm_android.sh
 
       - name: Set up Gradle
         uses: gradle/actions/setup-gradle@v4
