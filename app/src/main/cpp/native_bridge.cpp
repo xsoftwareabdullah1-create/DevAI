@@ -109,3 +109,136 @@ Java_com_devai_MainActivity_nativeRunTransformer(JNIEnv* env, jobject, jintArray
         << "This is NOT a trained model and its output is not meaningful chat.";
     return env->NewStringUTF(out.str().c_str());
 }
+
+
+// First usable offline baseline: train a local character-ngram retrieval model
+// from the bundled prompt/response corpus. This is intentionally not described
+// as a generative Transformer or as a trained language model.
+#include <cctype>
+#include <cmath>
+#include <unordered_map>
+
+namespace {
+struct RetrievalDocument {
+    std::string answer;
+    std::unordered_map<std::string, float> weights;
+    float norm = 0.0f;
+};
+std::vector<RetrievalDocument> gRetrievalDocs;
+std::unordered_map<std::string, float> gRetrievalIdf;
+bool gRetrievalReady = false;
+
+std::string normalizeAscii(std::string s) {
+    for (char& c : s) {
+        const unsigned char u = static_cast<unsigned char>(c);
+        if (u < 128) c = static_cast<char>(std::tolower(u));
+    }
+    return s;
+}
+std::unordered_map<std::string, float> makeNgrams(const std::string& input) {
+    const std::string s = normalizeAscii(input);
+    std::unordered_map<std::string, float> terms;
+    // UTF-8 byte n-grams preserve matching across English, Hindi and Urdu.
+    for (std::size_t n = 2; n <= 4; ++n) {
+        if (s.size() < n) continue;
+        for (std::size_t i = 0; i + n <= s.size(); ++i) {
+            const std::string gram = s.substr(i, n);
+            bool whitespaceOnly = true;
+            for (unsigned char c : gram) if (!std::isspace(c)) { whitespaceOnly = false; break; }
+            if (!whitespaceOnly) terms[gram] += 1.0f;
+        }
+    }
+    return terms;
+}
+}
+extern "C" JNIEXPORT jstring JNICALL
+Java_com_devai_MainActivity_nativeTrainCorpus(JNIEnv* env, jobject, jstring corpus) {
+    if (!corpus) return env->NewStringUTF("Corpus unavailable.");
+    const char* chars = env->GetStringUTFChars(corpus, nullptr);
+    if (!chars) return env->NewStringUTF("Could not read corpus.");
+    const std::string raw(chars);
+    env->ReleaseStringUTFChars(corpus, chars);
+    std::vector<RetrievalDocument> docs;
+    std::vector<std::unordered_map<std::string, float>> rawTerms;
+    std::unordered_map<std::string, int> documentFrequency;
+    std::istringstream lines(raw);
+    std::string line;
+    while (std::getline(lines, line)) {
+        const std::size_t split = line.find('\t');
+        if (split == std::string::npos || split == 0 || split + 1 >= line.size()) continue;
+        const std::string prompt = line.substr(0, split);
+        const std::string answer = line.substr(split + 1);
+        auto terms = makeNgrams(prompt);
+        if (terms.empty()) continue;
+        for (const auto& term : terms) ++documentFrequency[term.first];
+        rawTerms.push_back(std::move(terms));
+        RetrievalDocument doc;
+        doc.answer = answer;
+        docs.push_back(std::move(doc));
+    }
+    if (docs.empty()) return env->NewStringUTF("No valid prompt/response records found.");
+    std::unordered_map<std::string, float> idf;
+    const float count = static_cast<float>(docs.size());
+    for (const auto& item : documentFrequency)
+        idf[item.first] = std::log(1.0f + (count + 1.0f) / (item.second + 1.0f));
+    for (std::size_t i = 0; i < docs.size(); ++i) {
+        double norm = 0.0;
+        for (const auto& term : rawTerms[i]) {
+            const float weight = (1.0f + std::log(term.second)) * idf[term.first];
+            docs[i].weights[term.first] = weight;
+            norm += static_cast<double>(weight) * weight;
+        }
+        docs[i].norm = static_cast<float>(std::sqrt(norm));
+    }
+    {
+        std::lock_guard<std::mutex> lock(gMutex);
+        gRetrievalDocs.swap(docs);
+        gRetrievalIdf.swap(idf);
+        gRetrievalReady = true;
+    }
+    std::ostringstream out;
+    out << "Offline retrieval training complete.\\nRecords learned: " << gRetrievalDocs.size()
+        << "\\nMethod: character n-gram TF-IDF\\nNo external model or network used."
+        << "\\nThis baseline retrieves learned examples; it does not yet generate novel text.";
+    return env->NewStringUTF(out.str().c_str());
+}
+extern "C" JNIEXPORT jstring JNICALL
+Java_com_devai_MainActivity_nativeAsk(JNIEnv* env, jobject, jstring question) {
+    if (!question) return env->NewStringUTF("Please type a message.");
+    const char* chars = env->GetStringUTFChars(question, nullptr);
+    if (!chars) return env->NewStringUTF("I couldn't read that message.");
+    const std::string query(chars);
+    env->ReleaseStringUTFChars(question, chars);
+    const auto terms = makeNgrams(query);
+    if (terms.empty()) return env->NewStringUTF("Please write a little more so I can understand your question.");
+    std::lock_guard<std::mutex> lock(gMutex);
+    if (!gRetrievalReady || gRetrievalDocs.empty())
+        return env->NewStringUTF("My offline knowledge is not loaded yet. Please restart DevAI and try again.");
+    std::unordered_map<std::string, float> qWeights;
+    double qNorm2 = 0.0;
+    for (const auto& term : terms) {
+        const auto found = gRetrievalIdf.find(term.first);
+        if (found == gRetrievalIdf.end()) continue;
+        const float w = (1.0f + std::log(term.second)) * found->second;
+        qWeights[term.first] = w;
+        qNorm2 += static_cast<double>(w) * w;
+    }
+    const float qNorm = static_cast<float>(std::sqrt(qNorm2));
+    if (qNorm <= 0.0f) return env->NewStringUTF("I don't have a close match in my current offline knowledge yet.");
+    float bestScore = 0.0f;
+    std::size_t bestIndex = 0;
+    for (std::size_t i = 0; i < gRetrievalDocs.size(); ++i) {
+        const auto& doc = gRetrievalDocs[i];
+        double dot = 0.0;
+        for (const auto& term : qWeights) {
+            const auto found = doc.weights.find(term.first);
+            if (found != doc.weights.end()) dot += static_cast<double>(term.second) * found->second;
+        }
+        const float score = doc.norm > 0.0f ? static_cast<float>(dot / (qNorm * doc.norm)) : 0.0f;
+        if (score > bestScore) { bestScore = score; bestIndex = i; }
+    }
+    if (bestScore < 0.10f)
+        return env->NewStringUTF("I don't have a reliable match for that yet. My current offline knowledge is limited, and I don't want to guess.");
+    const std::string& answer = gRetrievalDocs[bestIndex].answer;
+    return env->NewStringUTF(answer.c_str());
+}
