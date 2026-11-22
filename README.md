@@ -2,77 +2,68 @@
 
 **An original, offline-first Android AI research project.**
 
-DevAI is being developed as an independently implemented language model. Its tokenizer, neural-network architecture, initialization, training loop, and learned weights are intended to be created in this repository. It does not use pretrained model weights or external AI APIs.
+DevAI is an independently implemented language-model research project. It uses no pretrained model weights and no external AI inference APIs. The current code includes an experimental tokenizer and a small C++ decoder-only Transformer forward pass.
 
-> Current status: Milestone 2 — experimental byte-level BPE tokenizer with versioned vocabulary persistence. The native C++ core can train merges from user-provided text, encode/decode token IDs, and save/load the learned merge ranks. This is still a tokenizer experiment, not a trained language model.
+> **Current status: Milestone 3 — forward-pass prototype.** The app can train a byte-level BPE tokenizer from supplied text, encode/decode IDs, and run a tiny randomly initialized Transformer. This is not a trained language model and does not produce meaningful chat.
 
-## Principles
+## Implemented
 
-- No pretrained model weights (Qwen, Llama, Gemma, DeepSeek, etc.).
-- No external AI inference service or API key.
-- Native Android app using Java + XML.
-- C++17 core connected through JNI.
-- Train model weights from random initialization.
-- Use documented datasets with appropriate licenses.
-- Run inference locally once a model has actually been trained.
+- Android Java + XML interface; C++17 core through JNI.
+- Byte-level BPE tokenizer training, encode and decode.
+- Decoder-only Transformer forward pass with token embeddings, RMSNorm, causal multi-head self-attention, RoPE, SwiGLU feed-forward layers, residual connections and vocabulary logits.
+- Deterministic random initialization from a configurable seed.
+- Input validation and a 2,000,000-parameter allocation guard.
+- No INTERNET permission, external inference API, or pretrained weights.
 
-## Current implementation
+## Tiny Android configuration
 
-- Android Java activity and XML interface.
-- CMake-built C++ shared library.
-- JNI bridge for tokenizer operations.
-- Deterministic byte-level BPE merge training from user-provided text.
-- Token encode/decode using the learned merge list.
-- Versioned binary tokenizer vocabulary save/load API in the native C++ core.
-- Host-side tokenizer tests for determinism, round trips, persistence, and malformed files.
-- No INTERNET permission and no network inference dependencies.
+The UI demo uses a deliberately small configuration: vocabulary 512, width 32, 4 attention heads, 1 layer, SwiGLU width 64, maximum sequence length 64. Parameters are randomly initialized each time the demo runs. This configuration validates tensor flow, not capability or quality.
 
-### Run native tokenizer tests
+## Native tests
 
-On a machine with a C++17 compiler:
+Requires a C++17 compiler:
 
 ```sh
 sh tests/run_tokenizer_tests.sh
+sh tests/run_transformer_tests.sh
 ```
 
-### Tokenizer limitations
+Transformer tests cover finite logits, causal prefix invariance, deterministic initialization, seed sensitivity, invalid IDs, sequence bounds, and invalid head dimensions.
 
-This is an educational first BPE implementation. It learns at most 128 merges from text entered into the app; it does not yet have Android UI controls for saving/loading vocabulary files, efficient large-corpus training, or a production-grade Unicode normalization/pre-tokenization pipeline. JNI currently uses Android's modified UTF-8 string interface, so supplementary Unicode characters need dedicated boundary tests before claiming full Unicode correctness.
+## Important limitations
 
-Tokenizer training does not train neural-network weights. The app is not yet a conversational AI.
+- No backpropagation, optimizer, training loop, dataset loader, or learned checkpoint exists yet.
+- The Android forward-pass button reports the highest final-position logit only. It does not decode a response or constitute a chat assistant.
+- Weights are reinitialized on each JNI call; they are not persisted.
+- This is a correctness-oriented scalar CPU reference, not optimized for NEON, multithreading, quantization, or long contexts.
+- Attention uses a simple causal loop and has quadratic sequence-time complexity.
+- The BPE vocabulary is held in process memory; persistence and production Unicode handling remain future work.
+- Actual runtime RAM, speed, battery and thermals still require physical-device profiling.
 
 ## Build requirements
 
-- Android Studio
-- Android SDK Platform 35
-- Android NDK (side-by-side)
-- CMake 3.22.1
-- JDK 17
-- Android Gradle Plugin 8.6.1 / compatible Gradle 8.x
-
-Open the project in Android Studio, install the requested SDK/NDK components, sync Gradle, and build the app debug variant.
-
-- Minimum Android: API 27 (Android 8.1)
-- Initial ABI: arm64-v8a
-- No Gradle wrapper is included yet.
+- Android Studio, Android SDK Platform 35
+- Android NDK and CMake 3.22.1
+- JDK 17 and Android Gradle Plugin 8.6.1
+- Initial ABI: arm64-v8a; minimum Android API 27
+- No Gradle wrapper is currently included.
 
 ## Roadmap
 
-1. [x] Android/JNI foundation and byte encoding prototype.
-2. [x] Experimental byte-level BPE training and encode/decode.
-3. [x] Initial host-side tokenizer tests.
-4. [x] Versioned native vocabulary save/load and persistence tests.
-5. [ ] Integrate tokenizer persistence with Android app-private storage.
-6. [ ] Implement a tiny decoder-only Transformer forward pass.
-7. [ ] Implement gradients, AdamW, gradient clipping, and checkpointing.
-8. [ ] Add licensed training/validation datasets and reproducible training configs.
-9. [ ] Train a small randomly initialized model and report measured validation loss.
-10. [ ] Add local autoregressive inference and connect it to chat.
-11. [ ] Profile memory, speed, battery and thermals on physical Android devices.
+1. [x] Android/JNI foundation.
+2. [x] Experimental byte-level BPE tokenizer.
+3. [x] Tiny decoder-only Transformer forward pass.
+4. [x] Basic native correctness tests.
+5. [ ] Persist tokenizer vocabulary and model checkpoints.
+6. [ ] Implement gradients, backpropagation, AdamW and gradient clipping.
+7. [ ] Add licensed dataset pipeline and reproducible training/validation.
+8. [ ] Train a tiny randomly initialized model and report held-out loss.
+9. [ ] Add autoregressive generation and real chat only after training.
+10. [ ] Profile and optimize for Android CPU, RAM, battery and thermal limits.
 
 ## Scaling reality
 
-A 100M-parameter model is a long-term research target, not a realistic first training run on a mid-range Android phone. Start with tiny configurations, measure peak memory and sustained throughput, checkpoint frequently, and scale only when measured resources permit. Parameter count alone does not imply useful intelligence.
+A 100M-parameter model is a long-term research target, not a realistic first training run on a mid-range Android phone. Begin with tiny configurations and scale only from measured memory and sustained throughput. Parameter count alone does not imply useful intelligence.
 
 ## Model integrity
 
