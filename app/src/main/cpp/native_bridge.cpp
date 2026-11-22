@@ -17,7 +17,7 @@ extern "C" JNIEXPORT jstring JNICALL
 Java_com_devai_MainActivity_nativeTokenizerInfo(JNIEnv* env, jobject) {
     std::lock_guard<std::mutex> lock(gMutex);
     std::ostringstream out;
-    out << "DevAI byte-level BPE tokenizer\nStatus: "
+    out << "Dev Orus 1.1 - DevAI original model\nDevAI byte-level BPE tokenizer\nStatus: "
         << (gTokenizer.isTrained() ? "trained from supplied text" : "not trained")
         << "\nVocabulary: " << gTokenizer.vocabularySize()
         << " tokens\nBase IDs 0-255 are bytes; learned merges start at 256."
@@ -99,7 +99,7 @@ Java_com_devai_MainActivity_nativeRunTransformer(JNIEnv* env, jobject, jintArray
     const auto first = logits.begin() + static_cast<std::ptrdiff_t>(offset);
     const auto best = std::max_element(first, first + config.vocabSize);
     std::ostringstream out;
-    out << "Tiny Transformer forward pass completed.\n"
+    out << "Dev Orus 1.1 - experimental model\nTiny Transformer forward pass completed.\n"
         << "Sequence length: " << ids.size() << "\n"
         << "Architecture: 1 layer; 4 heads; width 32; SwiGLU 64\n"
         << "Logits: " << logits.size() << " values\n"
