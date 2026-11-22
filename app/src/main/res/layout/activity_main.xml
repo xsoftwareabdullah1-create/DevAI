@@ -1,649 +1,177 @@
-package com.devai;
-
-import android.app.Activity;
-import android.app.AlertDialog;
-import android.content.res.ColorStateList;
-import android.graphics.Color;
-import android.graphics.Typeface;
-import android.graphics.drawable.GradientDrawable;
-import android.os.Bundle;
-import android.text.Editable;
-import android.text.TextWatcher;
-import android.view.Gravity;
-import android.view.View;
-import android.view.ViewGroup;
-import android.view.WindowManager;
-import android.view.inputmethod.EditorInfo;
-import android.widget.Button;
-import android.widget.EditText;
-import android.widget.FrameLayout;
-import android.widget.LinearLayout;
-import android.widget.ProgressBar;
-import android.widget.ScrollView;
-import android.widget.TextView;
-
-import org.json.JSONArray;
-import org.json.JSONObject;
-
-import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.InputStream;
-import java.net.HttpURLConnection;
-import java.net.URL;
-
-/**
- * Dev Orus 1.1 - poora UI ab is ek file mein code se banta hai (activity_main.xml ki zaroorat nahi).
- * Main screen: ChatGPT jaisi clean chat. Model download, status, New chat aur Crash report
- * ab Settings (⚙) ke andar hain. Model/JNI/CrashDiagnostics ka logic pehle jaisa hi hai.
- */
-public final class MainActivity extends Activity {
-
-    private static final String MODEL_URL =
-            "https://huggingface.co/litert-community/gemma-4-E2B-it-litert-lm/resolve/main/gemma-4-E2B-it.litertlm?download=true";
-    private static final long MIN_MODEL_BYTES = 2_000_000_000L;
-    private static final long REQUIRED_FREE_BYTES = 3_200_000_000L;
-
-    // JNI names must stay exactly like this (Java_com_devai_MainActivity_...).
-    private native String nativeInitGemma(String modelPath);
-    private native String nativeGenerate(String prompt);
-    private native void nativeShutdownGemma();
-
-    // ----- Colors -----
-    private static final int NAVY = 0xFF202A44;
-    private static final int TEXT = 0xFF171923;
-    private static final int BODY = 0xFF252936;
-    private static final int MUTED = 0xFF858B98;
-    private static final int PANEL = 0xFFF5F6F8;
-    private static final int BUBBLE = 0xFFF0F1F4;
-    private static final int LINE = 0xFFECEEF2;
-
-    // ----- Views -----
-    private FrameLayout root;
-    private LinearLayout messages;
-    private ScrollView chatScroll;
-    private EditText composer;
-    private TextView status;
-    private Button sendButton;
-    private Button modelButton;
-    private ProgressBar busyBar;
-    private View settingsPanel;
-
-    private volatile boolean ready = false;
-    private volatile boolean loading = false;
-    private volatile boolean nativeLoaded = false;
-    // Separate from `loading`: downloading and inference also use that flag.
-    // This prevents a second refresh/tap from creating another LiteRT-LM engine.
-    private volatile boolean initializing = false;
-
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        CrashDiagnostics.install(getApplicationContext());
-        CrashDiagnostics.record(getApplicationContext(), "MainActivity onCreate");
-        super.onCreate(savedInstanceState);
-        getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE);
-
-        buildUi();
-
-        addMessage("Dev Orus 1.1",
-                "Welcome. Dev Orus runs the Gemma 4 E2B model on this device through LiteRT-LM. "
-                + "Model download and other options are in Settings (⚙).",
-                false);
-        sendButton.setEnabled(false);
-        composer.setEnabled(false);
-        updateSendLook();
-        CrashDiagnostics.record(this, "UI ready; checking model");
-        checkExistingModel();
-    }
-
-    // =====================================================================
-    //  UI
-    // =====================================================================
-
-    private void buildUi() {
-        root = new FrameLayout(this);
-        root.setBackgroundColor(Color.WHITE);
-        root.setFitsSystemWindows(true);
-        setContentView(root);
-
-        LinearLayout main = new LinearLayout(this);
-        main.setOrientation(LinearLayout.VERTICAL);
-        root.addView(main, new FrameLayout.LayoutParams(-1, -1));
-
-        // Header: logo + name + settings
-        LinearLayout header = new LinearLayout(this);
-        header.setGravity(Gravity.CENTER_VERTICAL);
-        header.setPadding(dp(16), dp(8), dp(8), dp(8));
-
-        TextView logo = text("D", 20, Color.WHITE, true);
-        logo.setGravity(Gravity.CENTER);
-        logo.setBackground(round(NAVY, 8));
-        header.addView(logo, new LinearLayout.LayoutParams(dp(38), dp(38)));
-
-        TextView title = text("Dev Orus", 18, TEXT, true);
-        LinearLayout.LayoutParams tp = new LinearLayout.LayoutParams(0, -2, 1);
-        tp.leftMargin = dp(12);
-        header.addView(title, tp);
-
-        TextView gear = text("⚙", 24, 0xFF4B5160, false);
-        gear.setGravity(Gravity.CENTER);
-        gear.setContentDescription("Settings");
-        gear.setOnClickListener(v -> settingsPanel.setVisibility(View.VISIBLE));
-        header.addView(gear, new LinearLayout.LayoutParams(dp(48), dp(48)));
-        main.addView(header);
-
-        // Thin progress line (only while downloading / loading model)
-        busyBar = new ProgressBar(this, null, android.R.attr.progressBarStyleHorizontal);
-        busyBar.setMax(100);
-        busyBar.setProgressTintList(ColorStateList.valueOf(NAVY));
-        busyBar.setIndeterminateTintList(ColorStateList.valueOf(NAVY));
-        busyBar.setVisibility(View.GONE);
-        main.addView(busyBar, new LinearLayout.LayoutParams(-1, dp(3)));
-        main.addView(divider());
-
-        // Messages
-        chatScroll = new ScrollView(this);
-        chatScroll.setFillViewport(true);
-        chatScroll.setClipToPadding(false);
-        chatScroll.setPadding(dp(16), dp(12), dp(16), dp(12));
-        messages = new LinearLayout(this);
-        messages.setOrientation(LinearLayout.VERTICAL);
-        chatScroll.addView(messages, new ViewGroup.LayoutParams(-1, -2));
-        main.addView(chatScroll, new LinearLayout.LayoutParams(-1, 0, 1));
-
-        // Composer
-        LinearLayout box = new LinearLayout(this);
-        box.setGravity(Gravity.BOTTOM);
-        box.setBackground(round(PANEL, 26));
-        box.setPadding(dp(18), dp(4), dp(6), dp(4));
-
-        composer = new EditText(this);
-        composer.setBackground(null);
-        composer.setHint("Message Dev Orus");
-        composer.setHintTextColor(0xFF9298A4);
-        composer.setTextColor(0xFF20232B);
-        composer.setTextSize(16);
-        composer.setMaxLines(5);
-        composer.setMinHeight(dp(46));
-        composer.setImeOptions(EditorInfo.IME_ACTION_SEND);
-        composer.setInputType(android.text.InputType.TYPE_CLASS_TEXT
-                | android.text.InputType.TYPE_TEXT_FLAG_CAP_SENTENCES
-                | android.text.InputType.TYPE_TEXT_FLAG_MULTI_LINE);
-        composer.setOnEditorActionListener((v, actionId, event) -> {
-            if (actionId == EditorInfo.IME_ACTION_SEND) {
-                sendMessage();
-                return true;
-            }
-            return false;
-        });
-        composer.addTextChangedListener(new TextWatcher() {
-            public void beforeTextChanged(CharSequence s, int a, int b, int c) { }
-            public void onTextChanged(CharSequence s, int a, int b, int c) { updateSendLook(); }
-            public void afterTextChanged(Editable s) { }
-        });
-        box.addView(composer, new LinearLayout.LayoutParams(0, -2, 1));
-
-        sendButton = new Button(this);
-        sendButton.setText("↑");
-        sendButton.setTextSize(20);
-        sendButton.setTextColor(Color.WHITE);
-        sendButton.setPadding(0, 0, 0, 0);
-        sendButton.setMinWidth(0);
-        sendButton.setMinHeight(0);
-        sendButton.setStateListAnimator(null);
-        sendButton.setBackground(oval(NAVY));
-        sendButton.setContentDescription("Send message");
-        sendButton.setOnClickListener(v -> sendMessage());
-        LinearLayout.LayoutParams sp = new LinearLayout.LayoutParams(dp(42), dp(42));
-        sp.bottomMargin = dp(2);
-        box.addView(sendButton, sp);
-
-        LinearLayout.LayoutParams bp = new LinearLayout.LayoutParams(-1, -2);
-        bp.setMargins(dp(12), dp(8), dp(12), dp(2));
-        main.addView(box, bp);
-
-        TextView note = text("Dev Orus can make mistakes. Check important information.", 11, 0xFFA0A4AD, false);
-        note.setGravity(Gravity.CENTER);
-        note.setPadding(0, dp(4), 0, dp(8));
-        main.addView(note);
-
-        buildSettings();
-    }
-
-    private void buildSettings() {
-        LinearLayout panel = new LinearLayout(this);
-        panel.setOrientation(LinearLayout.VERTICAL);
-        panel.setBackgroundColor(Color.WHITE);
-        panel.setClickable(true); // touches must not reach the chat underneath
-        panel.setVisibility(View.GONE);
-        settingsPanel = panel;
-
-        LinearLayout top = new LinearLayout(this);
-        top.setGravity(Gravity.CENTER_VERTICAL);
-        top.setPadding(dp(8), dp(8), dp(16), dp(8));
-        TextView back = text("←", 24, TEXT, false);
-        back.setGravity(Gravity.CENTER);
-        back.setContentDescription("Back");
-        back.setOnClickListener(v -> settingsPanel.setVisibility(View.GONE));
-        top.addView(back, new LinearLayout.LayoutParams(dp(48), dp(48)));
-        top.addView(text("Settings", 18, TEXT, true));
-        panel.addView(top);
-        panel.addView(divider());
-
-        LinearLayout body = new LinearLayout(this);
-        body.setOrientation(LinearLayout.VERTICAL);
-        body.setPadding(dp(18), dp(18), dp(18), dp(18));
-
-        body.addView(text("Model", 13, MUTED, true));
-        status = text("Checking local model…", 14, BODY, false);
-        status.setPadding(0, dp(6), 0, dp(4));
-        body.addView(status);
-
-        modelButton = flatButton("Download Gemma model · about 2.6 GB", NAVY, Color.WHITE);
-        modelButton.setOnClickListener(v -> onModelButtonClicked());
-        body.addView(modelButton, buttonParams());
-
-        body.addView(text("Chat", 13, MUTED, true), sectionParams());
-        Button newChatButton = flatButton("New chat", PANEL, TEXT);
-        newChatButton.setOnClickListener(v -> {
-            messages.removeAllViews();
-            addMessage("Dev Orus 1.1", "New chat started. How can I help you?", false);
-            settingsPanel.setVisibility(View.GONE);
-        });
-        body.addView(newChatButton, buttonParams());
-
-        body.addView(text("Help", 13, MUTED, true), sectionParams());
-        Button crashButton = flatButton("View / Share Crash Report", 0xFFD8DBDD, TEXT);
-        crashButton.setOnClickListener(v -> CrashDiagnostics.show(this));
-        body.addView(crashButton, buttonParams());
-
-        TextView about = text("Dev Orus 1.1 · Google Gemma 4 E2B · LiteRT-LM · runs offline after setup",
-                12, MUTED, false);
-        about.setPadding(0, dp(24), 0, 0);
-        body.addView(about);
-
-        panel.addView(body);
-        root.addView(panel, new FrameLayout.LayoutParams(-1, -1));
-    }
-
-    private void updateSendLook() {
-        boolean active = sendButton.isEnabled() && composer.getText().toString().trim().length() > 0;
-        sendButton.setAlpha(active ? 1f : 0.3f);
-    }
-
-    private void setBusy(boolean busy, boolean indeterminate) {
-        busyBar.setIndeterminate(indeterminate);
-        busyBar.setVisibility(busy ? View.VISIBLE : View.GONE);
-    }
-
-    @Override
-    public void onBackPressed() {
-        if (settingsPanel.getVisibility() == View.VISIBLE) settingsPanel.setVisibility(View.GONE);
-        else super.onBackPressed();
-    }
-
-    // =====================================================================
-    //  Model (logic unchanged; only UI hooks added)
-    // =====================================================================
-
-    private boolean ensureNativeLoaded() {
-        if (nativeLoaded) return true;
-        try {
-            CrashDiagnostics.record(this, "Loading libdevai.so");
-            System.loadLibrary("devai");
-            nativeLoaded = true;
-            CrashDiagnostics.record(this, "Native library loaded");
-            return true;
-        } catch (Throwable error) {
-            CrashDiagnostics.record(this, "Native library load failed: " + error);
-            runOnUiThread(() -> status.setText("Native runtime error · Open Crash report"));
-            return false;
-        }
-    }
-
-    private File modelFile() {
-        File directory = new File(getFilesDir(), "models");
-        if (!directory.exists() && !directory.mkdirs()) return null;
-        return new File(directory, "gemma-4-E2B-it.litertlm");
-    }
-
-    private void checkExistingModel() {
-        File model = modelFile();
-        if (model != null && model.isFile() && model.length() >= MIN_MODEL_BYTES) {
-            initializeModel(model);
-        } else {
-            if (model != null && model.exists()) model.delete();
-            status.setText("MODEL NOT INSTALLED · First-time download required");
-            modelButton.setText("Download Gemma model · about 2.6 GB");
-            modelButton.setEnabled(true);
-            composer.setHint("Set up the model in Settings to start chatting");
-            // Show the first-run download popup as soon as the app opens.
-            modelButton.post(this::confirmModelDownload);
-        }
-    }
-
-    private void onModelButtonClicked() {
-        File model = modelFile();
-        if (model != null && model.isFile() && model.length() >= MIN_MODEL_BYTES) {
-            initializeModel(model);
-        } else {
-            confirmModelDownload();
-        }
-    }
-
-    private void confirmModelDownload() {
-        new AlertDialog.Builder(this)
-                .setTitle("Download Gemma 4 E2B?")
-                .setMessage("This is a one-time download of about 2.6 GB. Use Wi-Fi and make sure at least 3.2 GB of free storage is available. After download, model responses run offline.")
-                .setNegativeButton("Not now", null)
-                .setPositiveButton("Download", (dialog, which) -> downloadModel())
-                .show();
-    }
-
-    private void downloadModel() {
-        if (loading) return;
-        File model = modelFile();
-        if (model == null) {
-            status.setText("Could not create the private model folder.");
-            return;
-        }
-        if (model.getParentFile().getUsableSpace() < REQUIRED_FREE_BYTES) {
-            status.setText("Not enough free storage. Please free at least 3.2 GB and retry.");
-            return;
-        }
-
-        loading = true;
-        modelButton.setEnabled(false);
-        modelButton.setText("Downloading…");
-        status.setText("Connecting to model host…");
-        setBusy(true, true);
-
-        new Thread(() -> {
-            File partial = new File(model.getParentFile(), model.getName() + ".part");
-            HttpURLConnection connection = null;
-            try {
-                URL url = new URL(MODEL_URL);
-                connection = (HttpURLConnection) url.openConnection();
-                connection.setInstanceFollowRedirects(true);
-                connection.setConnectTimeout(30000);
-                connection.setReadTimeout(120000);
-                connection.setRequestProperty("User-Agent", "DevAI-DevOrus/1.1 Android");
-                connection.connect();
-
-                int response = connection.getResponseCode();
-                if (response < 200 || response >= 300) {
-                    throw new IllegalStateException("Model host returned HTTP " + response);
-                }
-
-                long total = connection.getContentLengthLong();
-                long downloaded = 0L;
-                long lastUpdate = 0L;
-                try (InputStream input = new BufferedInputStream(connection.getInputStream());
-                     BufferedOutputStream output = new BufferedOutputStream(new FileOutputStream(partial))) {
-                    byte[] buffer = new byte[1024 * 256];
-                    int count;
-                    while ((count = input.read(buffer)) != -1) {
-                        output.write(buffer, 0, count);
-                        downloaded += count;
-                        long now = System.currentTimeMillis();
-                        if (now - lastUpdate > 500) {
-                            final long current = downloaded;
-                            final long expected = total;
-                            runOnUiThread(() -> {
-                                if (expected > 0) {
-                                    int percent = (int) Math.min(100, current * 100L / expected);
-                                    status.setText("Downloading Gemma 4 E2B · " + percent + "% · "
-                                            + (current / (1024 * 1024)) + " MB");
-                                    modelButton.setText(percent + "%");
-                                    setBusy(true, false);
-                                    busyBar.setProgress(percent);
-                                } else {
-                                    status.setText("Downloading Gemma 4 E2B · "
-                                            + (current / (1024 * 1024)) + " MB");
-                                }
-                            });
-                            lastUpdate = now;
-                        }
-                    }
-                }
-
-                if (downloaded < MIN_MODEL_BYTES) {
-                    throw new IllegalStateException("Downloaded file is smaller than the expected Gemma model.");
-                }
-                if (total > 0 && downloaded != total) {
-                    throw new IllegalStateException("Download size did not match the server's content length.");
-                }
-                if (model.exists() && !model.delete()) {
-                    throw new IllegalStateException("Could not replace the previous model file.");
-                }
-                if (!partial.renameTo(model)) {
-                    throw new IllegalStateException("Could not finalize the downloaded model.");
-                }
-                runOnUiThread(() -> initializeModel(model));
-            } catch (Exception e) {
-                partial.delete();
-                runOnUiThread(() -> {
-                    loading = false;
-                    setBusy(false, false);
-                    modelButton.setEnabled(true);
-                    modelButton.setText("Retry model download");
-                    status.setText("Download failed: " + e.getMessage());
-                    addMessage("Dev Orus 1.1",
-                            "The model was not installed. Check your connection and free storage, then retry from Settings.",
-                            false);
-                });
-            } finally {
-                if (connection != null) connection.disconnect();
-            }
-        }, "devorus-model-download").start();
-    }
-
-    private void initializeModel(File model) {
-        if (ready || initializing) {
-            CrashDiagnostics.record(this, "Ignoring duplicate model initialization request; ready="
-                    + ready + ", initializing=" + initializing);
-            return;
-        }
-        initializing = true;
-        loading = true;
-        modelButton.setEnabled(false);
-        modelButton.setText("Loading model…");
-        status.setText("Loading Gemma 4 E2B · This can take a little time…");
-        setBusy(true, true);
-        new Thread(() -> {
-            CrashDiagnostics.record(this, "Gemma initialization started; model bytes=" + model.length());
-            String result = ensureNativeLoaded() ? nativeInitGemma(model.getAbsolutePath()) : "Native library load failed; open Crash report.";
-            CrashDiagnostics.record(this, "Gemma initialization finished: " + result);
-            boolean success = "READY".equals(result);
-            runOnUiThread(() -> {
-                initializing = false;
-                loading = false;
-                setBusy(false, false);
-                if (isFinishing() || isDestroyed()) {
-                    if (success) nativeShutdownGemma();
-                    ready = false;
-                    CrashDiagnostics.record(getApplicationContext(),
-                            "Gemma initialization completed after Activity destruction; engine closed");
-                    return;
-                }
-                ready = success;
-                sendButton.setEnabled(success);
-                composer.setEnabled(success);
-                updateSendLook();
-                composer.setHint(success ? "Message Dev Orus" : "Set up the model in Settings to start chatting");
-                modelButton.setEnabled(!success);
-                modelButton.setText(success ? "Model ready · Offline" : "Retry model loading");
-                status.setText(success
-                        ? "DEV ORUS 1.1 · GEMMA 4 E2B · OFFLINE"
-                        : "Model initialization failed");
-                addMessage("Dev Orus 1.1", success
-                        ? "I'm ready. The local Gemma model is loaded and chat works without an internet connection."
-                        : "I couldn't load the model: " + result, false);
-            });
-        }, "devorus-model-init").start();
-    }
-
-    // =====================================================================
-    //  Chat
-    // =====================================================================
-
-    private void sendMessage() {
-        final String question = composer.getText().toString().trim();
-        if (question.isEmpty() || !ready || loading) return;
-        composer.setText("");
-        addMessage("You", question, true);
-        sendButton.setEnabled(false);
-        updateSendLook();
-        status.setText("Dev Orus 1.1 is thinking…");
-        loading = true;
-        final TextView pending = addMessage("Dev Orus 1.1", "Thinking…", false);
-
-        new Thread(() -> {
-            CrashDiagnostics.record(this, "Inference started; prompt chars=" + question.length());
-            String raw = ensureNativeLoaded() ? nativeGenerate(question) : "{\"error\":\"Native library unavailable. Open Crash report.\"}";
-            CrashDiagnostics.record(this, "Inference returned");
-            String answer = extractAnswer(raw);
-            runOnUiThread(() -> {
-                pending.setText(answer);
-                chatScroll.post(() -> chatScroll.fullScroll(ScrollView.FOCUS_DOWN));
-                loading = false;
-                sendButton.setEnabled(ready);
-                updateSendLook();
-                status.setText("DEV ORUS 1.1 · GEMMA 4 E2B · OFFLINE");
-            });
-        }, "devorus-inference").start();
-    }
-
-    private String extractAnswer(String raw) {
-        try {
-            JSONObject response = new JSONObject(raw);
-            if (response.has("error")) return response.optString("error");
-            Object content = response.opt("content");
-            if (content instanceof String) return (String) content;
-            if (content instanceof JSONObject) {
-                JSONObject object = (JSONObject) content;
-                return object.optString("text", object.toString());
-            }
-            if (content instanceof JSONArray) {
-                JSONArray parts = (JSONArray) content;
-                StringBuilder text = new StringBuilder();
-                for (int i = 0; i < parts.length(); i++) {
-                    JSONObject part = parts.optJSONObject(i);
-                    if (part != null) text.append(part.optString("text", ""));
-                }
-                if (text.length() > 0) return text.toString().trim();
-            }
-            return response.optString("text", raw);
-        } catch (Exception ignored) {
-            return raw;
-        }
-    }
-
-    /** ChatGPT style: user = right bubble, assistant = avatar + plain text. Returns the text view. */
-    private TextView addMessage(String sender, String body, boolean user) {
-        TextView content = text(body, 16, BODY, false);
-        content.setLineSpacing(dp(3), 1.0f);
-        content.setTextIsSelectable(true);
-
-        LinearLayout row = new LinearLayout(this);
-        LinearLayout.LayoutParams rp = new LinearLayout.LayoutParams(-1, -2);
-        rp.topMargin = dp(8);
-        rp.bottomMargin = dp(8);
-
-        if (user) {
-            content.setBackground(round(BUBBLE, 20));
-            content.setPadding(dp(16), dp(10), dp(16), dp(10));
-            content.setMaxWidth(dp(300));
-            row.setGravity(Gravity.END);
-            row.addView(content, new LinearLayout.LayoutParams(-2, -2));
-        } else {
-            TextView avatar = text("D", 13, Color.WHITE, true);
-            avatar.setGravity(Gravity.CENTER);
-            avatar.setBackground(oval(NAVY));
-            LinearLayout.LayoutParams ap = new LinearLayout.LayoutParams(dp(28), dp(28));
-            ap.rightMargin = dp(12);
-            ap.topMargin = dp(2);
-            row.addView(avatar, ap);
-            row.addView(content, new LinearLayout.LayoutParams(0, -2, 1));
-        }
-        messages.addView(row, rp);
-        chatScroll.post(() -> chatScroll.fullScroll(ScrollView.FOCUS_DOWN));
-        return content;
-    }
-
-    @Override
-    protected void onDestroy() {
-        CrashDiagnostics.record(this, "Activity onDestroy");
-        if (nativeLoaded && (ready || initializing)) {
-            // JNI serializes shutdown against initialization/inference. Closing here also
-            // prevents the large model engine remaining resident after Activity teardown.
-            nativeShutdownGemma();
-            ready = false;
-            initializing = false;
-        }
-        super.onDestroy();
-    }
-
-    // =====================================================================
-    //  Small helpers
-    // =====================================================================
-
-    private int dp(int v) {
-        return Math.round(v * getResources().getDisplayMetrics().density);
-    }
-
-    private TextView text(String s, int sp, int color, boolean bold) {
-        TextView t = new TextView(this);
-        t.setText(s);
-        t.setTextSize(sp);
-        t.setTextColor(color);
-        if (bold) t.setTypeface(Typeface.DEFAULT, Typeface.BOLD);
-        return t;
-    }
-
-    private Button flatButton(String s, int bg, int fg) {
-        Button b = new Button(this);
-        b.setText(s);
-        b.setAllCaps(false);
-        b.setTextSize(14);
-        b.setTextColor(fg);
-        b.setStateListAnimator(null);
-        b.setBackground(round(bg, 10));
-        b.setPadding(dp(12), dp(14), dp(12), dp(14));
-        return b;
-    }
-
-    private LinearLayout.LayoutParams buttonParams() {
-        LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(-1, -2);
-        lp.topMargin = dp(10);
-        return lp;
-    }
-
-    private LinearLayout.LayoutParams sectionParams() {
-        LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(-2, -2);
-        lp.topMargin = dp(24);
-        return lp;
-    }
-
-    private GradientDrawable round(int color, int radiusDp) {
-        GradientDrawable g = new GradientDrawable();
-        g.setColor(color);
-        g.setCornerRadius(dp(radiusDp));
-        return g;
-    }
-
-    private GradientDrawable oval(int color) {
-        GradientDrawable g = new GradientDrawable();
-        g.setShape(GradientDrawable.OVAL);
-        g.setColor(color);
-        return g;
-    }
-
-    private View divider() {
-        View v = new View(this);
-        v.setBackgroundColor(LINE);
-        v.setLayoutParams(new LinearLayout.LayoutParams(-1, dp(1)));
-        return v;
-    }
-}
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="#FFFFFF">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="64dp"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:paddingStart="18dp"
+        android:paddingEnd="14dp"
+        android:background="#FFFFFF">
+
+        <TextView
+            android:layout_width="38dp"
+            android:layout_height="38dp"
+            android:gravity="center"
+            android:text="D"
+            android:textColor="#FFFFFF"
+            android:textSize="21sp"
+            android:textStyle="bold"
+            android:background="#202A44" />
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="vertical"
+            android:layout_marginStart="11dp">
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Dev Orus"
+                android:textColor="#171923"
+                android:textSize="17sp"
+                android:textStyle="bold" />
+            <TextView
+                android:id="@+id/status"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Checking local model…"
+                android:textColor="#858B98"
+                android:textSize="11sp" />
+        </LinearLayout>
+
+        <Button
+            android:id="@+id/newChatButton"
+            android:layout_width="wrap_content"
+            android:layout_height="40dp"
+            android:minWidth="0dp"
+            android:text="＋"
+            android:textSize="22sp"
+            android:textColor="#252A35"
+            android:backgroundTint="#F2F3F6"
+            android:contentDescription="New chat" />
+    </LinearLayout>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="#ECEEF2" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:paddingStart="18dp"
+        android:paddingEnd="18dp"
+        android:paddingTop="10dp"
+        android:paddingBottom="8dp">
+
+        <Button
+            android:id="@+id/modelButton"
+            android:layout_width="match_parent"
+            android:layout_height="44dp"
+            android:text="Download Gemma model · about 2.6 GB"
+            android:textAllCaps="false"
+            android:textColor="#FFFFFF"
+            android:textSize="13sp"
+            android:backgroundTint="#202A44" />
+
+        <Button
+            android:id="@+id/crashReportButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="View / Share Crash Report"
+            android:visibility="gone" />
+    </LinearLayout>
+
+    <ScrollView
+        android:id="@+id/chatScroll"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:fillViewport="true"
+        android:clipToPadding="false"
+        android:paddingStart="18dp"
+        android:paddingEnd="18dp"
+        android:paddingTop="18dp"
+        android:paddingBottom="20dp">
+
+        <LinearLayout
+            android:id="@+id/messages"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical" />
+    </ScrollView>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="#ECEEF2" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:paddingStart="14dp"
+        android:paddingEnd="14dp"
+        android:paddingTop="10dp"
+        android:paddingBottom="8dp"
+        android:background="#FFFFFF">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:background="#F5F6F8"
+            android:paddingStart="14dp"
+            android:paddingEnd="7dp"
+            android:paddingTop="5dp"
+            android:paddingBottom="5dp">
+
+            <EditText
+                android:id="@+id/composer"
+                android:layout_width="0dp"
+                android:layout_height="48dp"
+                android:layout_weight="1"
+                android:background="@android:color/transparent"
+                android:hint="Message Dev Orus"
+                android:imeOptions="actionSend"
+                android:inputType="textCapSentences|textMultiLine"
+                android:maxLines="5"
+                android:paddingStart="2dp"
+                android:paddingEnd="8dp"
+                android:textColor="#20232B"
+                android:textColorHint="#9298A4"
+                android:textSize="15sp" />
+
+            <Button
+                android:id="@+id/sendButton"
+                android:layout_width="44dp"
+                android:layout_height="44dp"
+                android:minWidth="0dp"
+                android:padding="0dp"
+                android:enabled="false"
+                android:text="↑"
+                android:textSize="22sp"
+                android:textColor="#FFFFFF"
+                android:backgroundTint="#202A44"
+                android:contentDescription="Send message" />
+        </LinearLayout>
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:paddingTop="7dp"
+            android:text="Dev Orus can make mistakes. Check important information."
+            android:textColor="#A0A4AD"
+            android:textSize="10sp" />
+    </LinearLayout>
+</LinearLayout>
