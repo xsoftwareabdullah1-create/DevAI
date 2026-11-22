@@ -23,7 +23,16 @@ DevAI is being developed as an independently implemented language model. Its tok
 - JNI bridge for tokenizer operations.
 - Deterministic byte-level BPE merge training from user-provided text.
 - Token encode/decode using the learned merge list.
+- Host-side tokenizer tests and a standalone test runner.
 - No INTERNET permission and no network inference dependencies.
+
+### Run native tokenizer tests
+
+On a machine with a C++17 compiler:
+
+```sh
+sh tests/run_tokenizer_tests.sh
+```
 
 ### Tokenizer limitations
 
@@ -50,13 +59,14 @@ Open the project in Android Studio, install the requested SDK/NDK components, sy
 
 1. [x] Android/JNI foundation and byte encoding prototype.
 2. [x] Experimental byte-level BPE training and encode/decode.
-3. [ ] Add tokenizer serialization, deterministic fixtures, and native unit tests.
-4. [ ] Implement a tiny decoder-only Transformer forward pass.
-5. [ ] Implement gradients, AdamW, gradient clipping, and checkpointing.
-6. [ ] Add licensed training/validation datasets and reproducible training configs.
-7. [ ] Train a small randomly initialized model and report measured validation loss.
-8. [ ] Add local autoregressive inference and connect it to chat.
-9. [ ] Profile memory, speed, battery and thermals on physical Android devices.
+3. [x] Initial host-side tokenizer tests.
+4. [ ] Persist tokenizer vocabulary and merge ranks.
+5. [ ] Implement a tiny decoder-only Transformer forward pass.
+6. [ ] Implement gradients, AdamW, gradient clipping, and checkpointing.
+7. [ ] Add licensed training/validation datasets and reproducible training configs.
+8. [ ] Train a small randomly initialized model and report measured validation loss.
+9. [ ] Add local autoregressive inference and connect it to chat.
+10. [ ] Profile memory, speed, battery and thermals on physical Android devices.
 
 ## Scaling reality
 
