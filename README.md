@@ -2,6 +2,8 @@
 
 **An original, offline-first Android AI research project.**
 
+**Model name: Dev Orus 1.1**
+
 DevAI is being developed as an independently created language model. It will use its own architecture, tokenizer, training data pipeline, learned weights, and inference runtime. **No pretrained external AI model, third-party model weights, hosted AI API, or external AI service is to be integrated.**
 
 > **Current status:** the repository currently contains an experimental byte-level tokenizer and a tiny randomly initialized C++ Transformer forward pass. It does not yet have backpropagation, an optimizer, a model training loop, or learned model checkpoints. The app is not yet a functional AI chatbot. The external-model proposal was removed before any Qwen/llama.cpp runtime or model weights were integrated.
