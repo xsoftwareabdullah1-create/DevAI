@@ -8,6 +8,7 @@ SHA256="1d430d80eaf536f696a4922270ba55eb3d112189ac198c3066d487a45e3b4d4c"
 command -v curl >/dev/null
 command -v unzip >/dev/null
 command -v sha256sum >/dev/null
+command -v file >/dev/null
 echo "Downloading official LiteRT-LM C API 1.0.0 Android SDK..."
 curl --fail --location --retry 3 --retry-delay 2 "$URL" --output "$ZIP_PATH"
 echo "$SHA256  $ZIP_PATH" | sha256sum --check -
@@ -15,13 +16,16 @@ TMP_DIR="$(mktemp -d)"
 trap 'rm -rf "$TMP_DIR"' EXIT
 unzip -q "$ZIP_PATH" -d "$TMP_DIR"
 
-LIB_PATH="$(find "$TMP_DIR" -type f -iname 'libLiteRtLm.so' -print -quit)"
+LIB_PATH=""
+while IFS= read -r candidate; do
+  if file "$candidate" | grep -q "ARM aarch64"; then
+    LIB_PATH="$candidate"
+    break
+  fi
+done < <(find "$TMP_DIR" -type f -iname '*litert*lm*.so' -print)
 if [[ -z "$LIB_PATH" ]]; then
-  LIB_PATH="$(find "$TMP_DIR" -type f -iname '*litert*lm*.so' -print -quit)"
-fi
-if [[ -z "$LIB_PATH" ]]; then
-  echo "LiteRT-LM archive did not contain the Android arm64 shared library." >&2
-  find "$TMP_DIR" -type f -name '*.so' -print >&2
+  echo "LiteRT-LM archive did not contain an ARM64 Android shared library." >&2
+  find "$TMP_DIR" -type f -name '*.so' -exec file {} \; >&2
   exit 1
 fi
 
