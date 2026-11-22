@@ -1,114 +1,61 @@
 # DevAI
 
-**An original, offline-first Android AI research project.**
+**Offline-first Android AI chat application.**
 
-DevAI is an independently implemented language-model research project. It uses no pretrained model weights and no external AI inference APIs. The current code includes an experimental tokenizer, a small C++ decoder-only Transformer forward pass, and an original multilingual starter corpus.
+DevAI is moving from its experimental scratch-built Transformer demo to a practical on-device assistant using an existing open-weight model. The app will retain a native Android Java/XML interface and use C++ through JNI for local inference.
 
-> **Current status: forward-pass prototype + starter dataset.** The app can train a byte-level BPE tokenizer from supplied text, encode/decode IDs, and run a tiny randomly initialized Transformer. A 198-record multilingual starter corpus now includes everyday-life discussions, advanced multi-turn dialogues, digital literacy, critical thinking and detailed-answer examples—not just school facts. The model has **not** learned this corpus yet and does not produce meaningful chat. A separate 200,000-record conversation-corpus target is documented; it is not yet populated.
+> **Current status:** the repository still contains the earlier tokenizer and tiny random-weight Transformer demo. The Qwen3 model and llama.cpp runtime are the selected replacement architecture, but they have not yet been integrated or tested in the APK. Do not treat the current APK as a working AI chat app.
 
-## Implemented
+## Selected model and runtime
 
-- Android Java + XML interface; C++17 core through JNI.
-- Byte-level BPE tokenizer training, encode and decode.
-- Decoder-only Transformer forward pass with token embeddings, RMSNorm, causal multi-head self-attention, RoPE, SwiGLU feed-forward layers, residual connections and vocabulary logits.
-- Deterministic random initialization from a configurable seed.
-- Input validation and a 2,000,000-parameter allocation guard.
-- Original 198-record starter corpus: general knowledge, casual conversation, everyday-life topics and advanced contextual dialogues in English, Hindi and Urdu.
-- Optional prior-turn context on advanced dialogue records, validated for alternating user/assistant roles.
-- Optional `response_style: detailed` metadata marks examples intended to teach structured, longer explanations.
-- Python standard-library validator for the JSONL corpus.
-- Deterministic train/validation split preparation that keeps translated variants of the same concept together.
-- No INTERNET permission, external inference API, or pretrained weights.
+- **Model:** [Qwen3-0.6B](https://huggingface.co/Qwen/Qwen3-0.6B), an instruction/chat-capable open-weight model published under Apache 2.0.
+- **Android model format:** GGUF, initially Q4_K_M quantization (approximately 0.48 GB; exact file and SHA-256 must be pinned before shipping).
+- **Inference runtime:** [llama.cpp](https://github.com/ggml-org/llama.cpp), built for Android arm64-v8a and called from Java through JNI.
+- **Target device:** Redmi 9 Power class hardware, beginning with CPU inference and a short context window. Actual speed and memory use must be measured on the phone.
+- **Offline behavior:** download the model file once, store it in app-private storage, then perform inference locally without an AI API or network connection.
 
-DevAI's long-term goal is open-domain conversation: understanding questions, informal messages, follow-ups, corrections, mixed-language text and unfamiliar topics—not only matching a fixed FAQ list. See the [open-domain understanding requirements](docs/RESPONSE_QUALITY_STANDARD.md#open-domain-understanding-the-intended-scope). This is a target, not a capability of the current untrained prototype.
+The upstream Qwen3 model card identifies the model as Apache-2.0. The GGUF is a converted/quantized representation, so the final release must retain upstream model attribution, conversion provenance, exact source revision, file hash, and applicable notices.
 
-## All-round answer quality
+## App experience
 
-DevAI's target response behavior and evaluation rubric are documented in [the response quality standard](docs/RESPONSE_QUALITY_STANDARD.md). It covers casual chat, general knowledge, education, science, coding, everyday decisions, creative work, reasoning, multilingual conversation, context handling, uncertainty and factual reliability. These are target requirements—not learned capabilities yet.
+- Chat-first home screen with message bubbles, composer, send/stop controls, and streaming response display.
+- Conversation history stored locally.
+- Model manager with download progress, file verification, storage estimate, and delete/re-download controls.
+- Settings for context length, response length, CPU thread count, and generation temperature, with safe device-aware defaults.
+- Developer Lab separated from normal chat: runtime status, model metadata, token speed, load time, memory estimate, and diagnostic logs.
+- Clear error states when the model is missing, incompatible, or cannot fit in available memory.
 
-## Starter knowledge and casual conversation data
+## Implementation plan
 
-See [data/knowledge/README.md](data/knowledge/README.md), [seed_knowledge.jsonl](data/knowledge/seed_knowledge.jsonl), and the [200,000-record conversation corpus plan](docs/CONVERSATION_CORPUS_PLAN.md).
-
-The starter records include basic science, geography, mathematics and biology, plus friendly handling of greetings, thanks, jokes, riddles, boredom and playful/nonsensical prompts. The intended behavior is to respond politely to casual questions instead of dismissing them, while not inventing factual answers.
-
-Validate the dataset:
-
-```sh
-python3 scripts/validate_knowledge_dataset.py
-python3 scripts/prepare_dataset.py --seed 2026
-```
-
-The current starter corpus covers English, Hindi and Urdu only, with 66 total records per language. The separate conversation expansion target is 200,000 records: 66,667 English, 66,667 Hindi and 66,666 Urdu. It spans academic facts, everyday life, communication, digital literacy, misinformation, AI limitations, money basics, complex discussions, causal reasoning, systems thinking, decision-making, conflict repair and evaluating sources across basic, intermediate and advanced levels. It is a small original seed set, not a comprehensive general-knowledge library. More languages and carefully reviewed, properly licensed data need to be added gradually.
-
-## First trainable model
-
-The next milestone is a genuinely trainable, randomly initialized model—not a tokenizer-only demo. The [first trainable model plan](docs/FIRST_TRAINABLE_MODEL.md) defines a roughly 43K-parameter baseline and the required backpropagation, AdamW, validation, checkpointing, and Android chat integration. This work is not implemented yet; the current Transformer still has random weights and no training loop. The 200,000-conversation target is also a plan, not an existing dataset.
-
-## Tiny Android configuration
-
-The UI demo uses a deliberately small configuration: vocabulary 512, width 32, 4 attention heads, 1 layer, SwiGLU width 64, maximum sequence length 64. Parameters are randomly initialized each time the demo runs. This configuration validates tensor flow, not capability or quality.
-
-## Native tests
-
-Requires a C++17 compiler:
-
-```sh
-sh tests/run_tokenizer_tests.sh
-sh tests/run_transformer_tests.sh
-python3 scripts/validate_knowledge_dataset.py
-```
-
-Transformer tests cover finite logits, causal prefix invariance, deterministic initialization, seed sensitivity, invalid IDs, sequence bounds, and invalid head dimensions.
+1. Pin a compatible llama.cpp revision and Qwen3 GGUF file; record SHA-256 and licensing notices.
+2. Build llama.cpp for Android arm64-v8a using the Android NDK and CMake.
+3. Add a JNI wrapper for model loading, token generation, cancellation, and cleanup.
+4. Implement the Java/XML chat UI and background inference execution.
+5. Add verified model download/import and private-storage management.
+6. Test prompt formatting, multi-turn context, Hindi/English/Hinglish behavior, cancellation, app lifecycle, and low-memory handling.
+7. Build the APK and test on the actual Redmi 9 Power before claiming device compatibility.
 
 ## Important limitations
 
-- No backpropagation, optimizer, model training loop, or learned checkpoint exists yet. The new split utility only prepares leakage-resistant train/validation files; it does not train the Transformer.
-- Adding corpus files does not teach the current model. The Android forward-pass button reports the highest final-position logit only; it does not decode a response or constitute a chat assistant.
-- Weights are reinitialized on each JNI call; they are not persisted.
-- The starter corpus is intentionally small and is insufficient for useful language-model training.
-- Multilingual expansion requires correctly labeled examples and language-specific evaluation. “All languages” is a long-term coverage goal, not a current capability.
-- This is a correctness-oriented scalar CPU reference, not optimized for NEON, multithreading, quantization, or long contexts.
-- Attention uses a simple causal loop and has quadratic sequence-time complexity.
-- The BPE vocabulary is held in process memory; persistence and production Unicode handling remain future work.
-- Actual runtime RAM, speed, battery and thermals still require physical-device profiling.
+- A 0.6B model is small and will make mistakes; it is not comparable to ChatGPT and cannot guarantee correct answers to every question.
+- Q4 quantization reduces storage and memory use but can reduce output quality.
+- Model download requires internet once; chat inference after the model is stored is offline.
+- Model file size is not the same as total runtime RAM. Context cache, Android, and other apps consume additional memory.
+- Device speed, thermals, and battery use are unknown until measured on target hardware.
+- No fine-tuning is included in the first integration. Any later fine-tuning must use reviewed, licensed data and be evaluated separately.
+
+## Previous research prototype
+
+The repository's earlier C++17 byte-level BPE tokenizer and randomly initialized tiny Transformer are retained for educational/reference purposes only. They are not the production chat engine and do not provide learned language ability. The old 198-record seed corpus and 200,000-conversation planning document are research assets, not a trained model dataset.
 
 ## Build requirements
 
-- Android Studio, Android SDK Platform 35
-- Android NDK and CMake 3.22.1
-- JDK 17 and Android Gradle Plugin 8.6.1
-- Initial ABI: arm64-v8a; minimum Android API 27
-- No Gradle wrapper is currently included.
-
-## Roadmap
-
-1. [x] Android/JNI foundation.
-2. [x] Experimental byte-level BPE tokenizer.
-3. [x] Tiny decoder-only Transformer forward pass.
-4. [x] Basic native correctness tests.
-5. [x] Original beginner knowledge + casual conversation starter corpus (English/Hindi/Urdu).
-6. [x] JSONL dataset validator and CI validation.
-7. [ ] Persist tokenizer vocabulary and model checkpoints.
-8. [ ] Implement gradients, backpropagation, AdamW and gradient clipping.
-9. [ ] Add licensed multilingual dataset pipeline, curriculum levels and reproducible train/validation splits.
-10. [ ] Train a tiny randomly initialized model and report held-out loss.
-11. [ ] Add autoregressive generation and real chat only after training.
-12. [ ] Expand language coverage and evaluate each language independently.
-13. [ ] Profile and optimize for Android CPU, RAM, battery and thermal limits.
-
-## Scaling reality
-
-A 100M-parameter model is a long-term research target, not a realistic first training run on a mid-range Android phone. Begin with tiny configurations and scale only from measured memory and sustained throughput. Parameter count alone does not imply useful intelligence.
-
-## Model integrity
-
-- Initialize all model weights randomly.
-- Never import or convert pretrained weights.
-- Record dataset provenance, license, preprocessing and training configuration.
-- Keep validation data out of training.
-- Report actual tests and measured results; do not claim capabilities that have not been demonstrated.
+- Android SDK Platform 35
+- Android NDK and CMake
+- JDK 17
+- Initial ABI: arm64-v8a
+- Minimum Android API 27
 
 ## License
 
-No project license has been selected yet. Until one is added, this repository does not grant an open-source license.
+The DevAI application code has not yet selected a project license. The integrated Qwen3 model has its own upstream Apache-2.0 license and attribution requirements; do not imply that model weights are authored by DevAI.
