@@ -48,6 +48,8 @@ def main() -> int:
             errors.append(f"line {line_number}: unsupported kind {item['kind']!r}")
         if item["language"] not in ALLOWED_LANGUAGES:
             errors.append(f"line {line_number}: unsupported starter language {item['language']!r}")
+        if "response_style" in item and item["response_style"] not in {"concise", "detailed"}:
+            errors.append(f"line {line_number}: response_style must be concise or detailed")
         if not isinstance(item["tags"], list) or not item["tags"] or not all(
             isinstance(tag, str) and tag.strip() for tag in item["tags"]
         ):
