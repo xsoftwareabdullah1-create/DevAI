@@ -1,6 +1,8 @@
 #include "../app/src/main/cpp/tokenizer.h"
 
 #include <cassert>
+#include <cstdio>
+#include <fstream>
 #include <iostream>
 #include <string>
 #include <vector>
@@ -22,6 +24,22 @@ int main() {
     ByteBpeTokenizer second;
     assert(second.train("hello hello hello\n", 32));
     assert(second.encode(sample) == ids);
+
+    const std::string path = "/tmp/devai-tokenizer-test.bpe";
+    assert(tokenizer.save(path));
+    ByteBpeTokenizer restored;
+    assert(restored.load(path));
+    assert(restored.vocabularySize() == tokenizer.vocabularySize());
+    assert(restored.encode(sample) == ids);
+    assert(restored.decode(ids) == sample);
+    std::remove(path.c_str());
+
+    const std::string malformed = "/tmp/devai-tokenizer-malformed.bpe";
+    { std::ofstream out(malformed, std::ios::binary); out << "not-a-model"; }
+    ByteBpeTokenizer rejected;
+    assert(!rejected.load(malformed));
+    assert(!rejected.isTrained());
+    std::remove(malformed.c_str());
 
     assert(tokenizer.decode(std::vector<int>{-1}).empty());
     assert(tokenizer.decode(std::vector<int>{tokenizer.vocabularySize()}).empty());
