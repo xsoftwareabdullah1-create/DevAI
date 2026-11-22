@@ -45,4 +45,4 @@ python3 scripts/prepare_dataset.py --seed 2026
 
 By default this reads the seed corpus and writes generated files under `build/dataset/`. The utility groups IDs ending in `-en`, `-hi` and `-ur` by their shared concept prefix before splitting. This prevents a translated version of a validation example from leaking into training. The default validation ratio is 10%; the seed makes the split reproducible.
 
-This is data preparation only. The Transformer still has no gradient calculation, optimizer or training loop, so the split files do not teach the model yet.
+This is data preparation only. The Transformer still has no gradient calculation, optimizer or training loop, so the split files do not teach the model yet. A separate target of 200,000 conversation records is planned in reviewed batches; see [the conversation corpus plan](../../docs/CONVERSATION_CORPUS_PLAN.md).
