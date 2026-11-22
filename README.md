@@ -61,10 +61,10 @@ The project may use ordinary development libraries and build tools, but those mu
 | Full model training loop | Not implemented |
 | Persistent learned checkpoints | Not implemented |
 | Autoregressive chat generation | Not implemented |
-| Chat-first interface | Planned |
-| Offline conversational AI | Future milestone |
+| Chat-first interface | Implemented (early prototype) |\n| Offline corpus retrieval | Implemented (TF-IDF character n-grams) |
+| Offline retrieval chat | Early prototype; limited to corpus matches |\n| Generative conversational AI | Future milestone |
 
-A successful forward pass is not evidence of learning. The current random model cannot understand a prompt or produce meaningful assistant responses. The existing APK, if built, must be treated as a developer prototype rather than a finished AI assistant.
+The chat currently uses a small corpus-trained retrieval index, not the random Transformer. It can return a stored response when a prompt is sufficiently similar to one of the 210 examples. It does not synthesize novel answers, reliably handle unseen topics, or maintain semantic multi-turn context. The Transformer remains an experimental forward-pass component and has no training loop.
 
 ## 3. Model identity and baseline architecture
 
@@ -147,7 +147,7 @@ A training milestone is complete only when its tests and metrics are recorded. M
 
 ## 6. Knowledge and conversation data
 
-The repository currently has a small **198-record starter corpus**, including **60 conversation records**, across English, Hindi, and Urdu. It is intended for schema, tokenizer, and pipeline experiments—not for creating a capable general-purpose assistant.
+The repository currently has a **210-record starter corpus** across English, Hindi, and Urdu. The Android prototype packages these prompt/response pairs and builds an in-memory retrieval index locally at startup. It is intended for schema, tokenizer, and pipeline experiments—not for creating a capable general-purpose assistant.
 
 A separate target of **200,000 conversation records** is documented as a future data goal. Those records are not currently present. The corpus must grow through reviewed, useful batches rather than repeated or fabricated filler.
 
@@ -249,14 +249,14 @@ A local Android build requires the matching SDK/NDK components. Check the workfl
 - [ ] Save/load versioned model and optimizer checkpoints.
 - [ ] Train the first Dev Orus 1.1 checkpoint and publish real metrics.
 - [ ] Add autoregressive generation.
-- [ ] Build the chat-first Android interface.
+- [x] Build an initial chat-first Android interface.\n- [x] Add an offline corpus-trained retrieval baseline.\n- [ ] Replace retrieval-only answers with a trained neural generative model.
 - [ ] Add a separate Developer Lab and model status panel.
 - [ ] Profile and test on the Redmi 9 Power.
 - [ ] Expand the reviewed multilingual conversation corpus.
 
 ## 13. Transparency and limitations
 
-DevAI is an active research project. It is not currently a trained general-purpose assistant. The first model will be small and limited; useful language ability requires more high-quality data, correct training code, sufficient compute, and repeated evaluation.
+DevAI is an active research project. It is not currently a trained general-purpose assistant. The current chat baseline is limited retrieval, not a generative neural model. A genuinely trainable neural model still requires tested loss/gradient code, optimization, checkpointing, generation, and evaluation. Useful language ability requires more high-quality data, correct training code, sufficient compute, and repeated evaluation.
 
 Do not interpret the model name or version label as proof of a trained release. Version 1.1 is the chosen project identity; model checkpoints and capability milestones will be versioned separately when they exist.
 
