@@ -2,7 +2,7 @@
 set -euo pipefail
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 SDK_DIR="$ROOT/app/src/main/cpp/third_party/litertlm"
-ZIP_PATH="\${RUNNER_TEMP:-/tmp}/litert_lm_c_api-1.0.0.zip"
+ZIP_PATH="/tmp/litert_lm_c_api-1.0.0.zip"
 URL="https://github.com/google-ai-edge/LiteRT-LM/releases/download/v0.19.1/litert_lm_c_api-1.0.0.zip"
 SHA256="1d430d80eaf536f696a4922270ba55eb3d112189ac198c3066d487a45e3b4d4c"
 command -v curl >/dev/null
