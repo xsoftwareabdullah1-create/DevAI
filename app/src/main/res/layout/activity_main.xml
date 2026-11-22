@@ -1,311 +1,177 @@
-package com.example.devorus; // apna package name yahan rakhein
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="#FFFFFF">
 
-import android.app.Activity;
-import android.content.Intent;
-import android.graphics.Color;
-import android.graphics.Typeface;
-import android.graphics.drawable.GradientDrawable;
-import android.os.Bundle;
-import android.text.Editable;
-import android.text.TextWatcher;
-import android.view.Gravity;
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.EditText;
-import android.widget.FrameLayout;
-import android.widget.LinearLayout;
-import android.widget.ScrollView;
-import android.widget.TextView;
-import android.widget.Toast;
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="64dp"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:paddingStart="18dp"
+        android:paddingEnd="14dp"
+        android:background="#FFFFFF">
 
-import java.io.File;
-import java.io.FileInputStream;
+        <TextView
+            android:layout_width="38dp"
+            android:layout_height="38dp"
+            android:gravity="center"
+            android:text="D"
+            android:textColor="#FFFFFF"
+            android:textSize="21sp"
+            android:textStyle="bold"
+            android:background="#202A44" />
 
-/**
- * Dev Orus - poora UI is ek hi file mein hai (XML ki zaroorat nahi).
- * Main screen par sirf chat hai. Model download, crash report aur New chat
- * ab Settings (⚙) ke andar hain.
- */
-public class MainActivity extends Activity {
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="vertical"
+            android:layout_marginStart="11dp">
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Dev Orus"
+                android:textColor="#171923"
+                android:textSize="17sp"
+                android:textStyle="bold" />
+            <TextView
+                android:id="@+id/status"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Checking local model…"
+                android:textColor="#858B98"
+                android:textSize="11sp" />
+        </LinearLayout>
 
-    // ---------- Colors ----------
-    static final int NAVY = 0xFF222B4A, PANEL = 0xFFF4F5F7, GRAY_BTN = 0xFFD8DBDD;
-    static final int TEXT = 0xFF111827, MUTED = 0xFF6B7280, LINE = 0xFFE5E7EB;
+        <Button
+            android:id="@+id/newChatButton"
+            android:layout_width="wrap_content"
+            android:layout_height="40dp"
+            android:minWidth="0dp"
+            android:text="＋"
+            android:textSize="22sp"
+            android:textColor="#252A35"
+            android:backgroundTint="#F2F3F6"
+            android:contentDescription="New chat" />
+    </LinearLayout>
 
-    FrameLayout root;
-    LinearLayout chatBox;
-    ScrollView scroll;
-    EditText et;
-    TextView send, statusTv, btnDownload;
-    View settings;
-    boolean modelInstalled = false;
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="#ECEEF2" />
 
-    // =====================================================================
-    //  YAHAN APNA MODEL / CRASH CODE JODEIN
-    // =====================================================================
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:paddingStart="18dp"
+        android:paddingEnd="18dp"
+        android:paddingTop="10dp"
+        android:paddingBottom="8dp">
 
-    /** "Download Gemma model" dabane par chalta hai. Download poora hone par setModelInstalled(true) call karein. */
-    void startModelDownload() {
-        Toast.makeText(this, "Download start hua...", Toast.LENGTH_SHORT).show();
-        // TODO: apna LiteRT-LM / Gemma download code yahan
-    }
+        <Button
+            android:id="@+id/modelButton"
+            android:layout_width="match_parent"
+            android:layout_height="44dp"
+            android:text="Download Gemma model · about 2.6 GB"
+            android:textAllCaps="false"
+            android:textColor="#FFFFFF"
+            android:textSize="13sp"
+            android:backgroundTint="#202A44" />
 
-    /** Model ka jawab. Jawab aane par runOnUiThread(() -> addBot(jawab)) se dikhayein. */
-    void generateReply(String userText) {
-        // TODO: apna Gemma inference code yahan
-        addBot("Model chal raha hai, lekin inference code abhi jura nahi hai.");
-    }
+        <Button
+            android:id="@+id/crashReportButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="View / Share Crash Report"
+            android:visibility="gone" />
+    </LinearLayout>
 
-    /** Crash report file ka naam. Apne crash handler ke hisaab se badal lein. */
-    String crashFileName = "crash_report.txt";
+    <ScrollView
+        android:id="@+id/chatScroll"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:fillViewport="true"
+        android:clipToPadding="false"
+        android:paddingStart="18dp"
+        android:paddingEnd="18dp"
+        android:paddingTop="18dp"
+        android:paddingBottom="20dp">
 
-    // =====================================================================
+        <LinearLayout
+            android:id="@+id/messages"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical" />
+    </ScrollView>
 
-    @Override
-    protected void onCreate(Bundle b) {
-        super.onCreate(b);
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="#ECEEF2" />
 
-        root = new FrameLayout(this);
-        root.setBackgroundColor(Color.WHITE);
-        root.setFitsSystemWindows(true);
-        setContentView(root);
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:paddingStart="14dp"
+        android:paddingEnd="14dp"
+        android:paddingTop="10dp"
+        android:paddingBottom="8dp"
+        android:background="#FFFFFF">
 
-        LinearLayout main = new LinearLayout(this);
-        main.setOrientation(LinearLayout.VERTICAL);
-        root.addView(main, new FrameLayout.LayoutParams(-1, -1));
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:background="#F5F6F8"
+            android:paddingStart="14dp"
+            android:paddingEnd="7dp"
+            android:paddingTop="5dp"
+            android:paddingBottom="5dp">
 
-        // ----- Header -----
-        LinearLayout header = new LinearLayout(this);
-        header.setGravity(Gravity.CENTER_VERTICAL);
-        header.setPadding(dp(16), dp(10), dp(12), dp(10));
+            <EditText
+                android:id="@+id/composer"
+                android:layout_width="0dp"
+                android:layout_height="48dp"
+                android:layout_weight="1"
+                android:background="@android:color/transparent"
+                android:hint="Message Dev Orus"
+                android:imeOptions="actionSend"
+                android:inputType="textCapSentences|textMultiLine"
+                android:maxLines="5"
+                android:paddingStart="2dp"
+                android:paddingEnd="8dp"
+                android:textColor="#20232B"
+                android:textColorHint="#9298A4"
+                android:textSize="15sp" />
 
-        TextView logo = tv("D", 20, Color.WHITE, true);
-        logo.setGravity(Gravity.CENTER);
-        logo.setBackground(round(NAVY, 6));
-        header.addView(logo, new LinearLayout.LayoutParams(dp(44), dp(44)));
+            <Button
+                android:id="@+id/sendButton"
+                android:layout_width="44dp"
+                android:layout_height="44dp"
+                android:minWidth="0dp"
+                android:padding="0dp"
+                android:enabled="false"
+                android:text="↑"
+                android:textSize="22sp"
+                android:textColor="#FFFFFF"
+                android:backgroundTint="#202A44"
+                android:contentDescription="Send message" />
+        </LinearLayout>
 
-        TextView title = tv("Dev Orus", 20, TEXT, true);
-        LinearLayout.LayoutParams tp = new LinearLayout.LayoutParams(0, -2, 1);
-        tp.leftMargin = dp(12);
-        header.addView(title, tp);
-
-        TextView gear = tv("⚙", 24, MUTED, false);
-        gear.setGravity(Gravity.CENTER);
-        gear.setContentDescription("Settings");
-        gear.setOnClickListener(v -> settings.setVisibility(View.VISIBLE));
-        header.addView(gear, new LinearLayout.LayoutParams(dp(44), dp(44)));
-        main.addView(header);
-        main.addView(divider());
-
-        // ----- Messages -----
-        scroll = new ScrollView(this);
-        chatBox = new LinearLayout(this);
-        chatBox.setOrientation(LinearLayout.VERTICAL);
-        chatBox.setPadding(dp(16), dp(12), dp(16), dp(12));
-        scroll.addView(chatBox, new ViewGroup.LayoutParams(-1, -2));
-        main.addView(scroll, new LinearLayout.LayoutParams(-1, 0, 1));
-
-        // ----- Composer -----
-        main.addView(divider());
-        LinearLayout composer = new LinearLayout(this);
-        composer.setGravity(Gravity.BOTTOM);
-        composer.setBackground(round(PANEL, 10));
-        composer.setPadding(dp(16), dp(6), dp(8), dp(6));
-
-        et = new EditText(this);
-        et.setBackground(null);
-        et.setHint("Message Dev Orus");
-        et.setHintTextColor(MUTED);
-        et.setTextColor(TEXT);
-        et.setTextSize(16);
-        et.setMaxLines(6);
-        et.setMinHeight(dp(44));
-        composer.addView(et, new LinearLayout.LayoutParams(0, -2, 1));
-
-        send = tv("↑", 20, Color.WHITE, true);
-        send.setGravity(Gravity.CENTER);
-        send.setBackground(round(NAVY, 8));
-        send.setAlpha(0.3f);
-        send.setOnClickListener(v -> sendMessage());
-        LinearLayout.LayoutParams sp = new LinearLayout.LayoutParams(dp(42), dp(42));
-        sp.bottomMargin = dp(2);
-        composer.addView(send, sp);
-
-        LinearLayout.LayoutParams cp = new LinearLayout.LayoutParams(-1, -2);
-        cp.setMargins(dp(12), dp(10), dp(12), dp(4));
-        main.addView(composer, cp);
-
-        TextView note = tv("Dev Orus can make mistakes. Check important information.", 12, MUTED, false);
-        note.setGravity(Gravity.CENTER);
-        note.setPadding(0, dp(2), 0, dp(8));
-        main.addView(note);
-
-        et.addTextChangedListener(new TextWatcher() {
-            public void beforeTextChanged(CharSequence s, int a, int c, int d) {}
-            public void onTextChanged(CharSequence s, int a, int c, int d) {
-                send.setAlpha(s.toString().trim().isEmpty() ? 0.3f : 1f);
-            }
-            public void afterTextChanged(Editable s) {}
-        });
-
-        buildSettings();
-        addBot("Welcome. Dev Orus ready hai. Model download aur baaki options ⚙ Settings mein hain.");
-        refreshModelStatus();
-    }
-
-    // ---------------- Settings screen ----------------
-    void buildSettings() {
-        LinearLayout p = new LinearLayout(this);
-        p.setOrientation(LinearLayout.VERTICAL);
-        p.setBackgroundColor(Color.WHITE);
-        p.setClickable(true); // neeche wali screen par touch na jaye
-        p.setVisibility(View.GONE);
-        settings = p;
-
-        LinearLayout top = new LinearLayout(this);
-        top.setGravity(Gravity.CENTER_VERTICAL);
-        top.setPadding(dp(8), dp(10), dp(16), dp(10));
-        TextView back = tv("←", 24, TEXT, false);
-        back.setGravity(Gravity.CENTER);
-        back.setOnClickListener(v -> settings.setVisibility(View.GONE));
-        top.addView(back, new LinearLayout.LayoutParams(dp(44), dp(44)));
-        top.addView(tv("Settings", 20, TEXT, true));
-        p.addView(top);
-        p.addView(divider());
-
-        LinearLayout body = new LinearLayout(this);
-        body.setOrientation(LinearLayout.VERTICAL);
-        body.setPadding(dp(16), dp(16), dp(16), dp(16));
-
-        body.addView(tv("Model", 13, MUTED, true));
-        statusTv = tv("", 14, TEXT, false);
-        statusTv.setPadding(0, dp(6), 0, 0);
-        body.addView(statusTv);
-
-        btnDownload = button("Download Gemma model · about 2.6 GB", NAVY, Color.WHITE);
-        btnDownload.setOnClickListener(v -> startModelDownload());
-        body.addView(btnDownload, btnParams());
-
-        TextView btnNew = button("New chat", PANEL, TEXT);
-        btnNew.setOnClickListener(v -> { chatBox.removeAllViews(); settings.setVisibility(View.GONE); addBot("Naya chat shuru. Kya madad karun?"); });
-        body.addView(btnNew, btnParams());
-
-        TextView btnCrash = button("VIEW / SHARE CRASH REPORT", GRAY_BTN, TEXT);
-        btnCrash.setOnClickListener(v -> shareCrashReport());
-        body.addView(btnCrash, btnParams());
-
-        p.addView(body);
-        root.addView(p, new FrameLayout.LayoutParams(-1, -1));
-    }
-
-    /** Download poora hone par yeh call karein: setModelInstalled(true) */
-    void setModelInstalled(boolean ok) { modelInstalled = ok; refreshModelStatus(); }
-
-    void refreshModelStatus() {
-        statusTv.setText(modelInstalled
-                ? "MODEL INSTALLED"
-                : "MODEL NOT INSTALLED · First-time download required");
-        btnDownload.setVisibility(modelInstalled ? View.GONE : View.VISIBLE);
-    }
-
-    void shareCrashReport() {
-        try {
-            File f = new File(getFilesDir(), crashFileName);
-            if (!f.exists()) { Toast.makeText(this, "Koi crash report nahi mili", Toast.LENGTH_SHORT).show(); return; }
-            byte[] data = new byte[(int) f.length()];
-            try (FileInputStream in = new FileInputStream(f)) { in.read(data); }
-            Intent i = new Intent(Intent.ACTION_SEND);
-            i.setType("text/plain");
-            i.putExtra(Intent.EXTRA_SUBJECT, "Dev Orus crash report");
-            i.putExtra(Intent.EXTRA_TEXT, new String(data));
-            startActivity(Intent.createChooser(i, "Share crash report"));
-        } catch (Exception e) {
-            Toast.makeText(this, "Report nahi khul saki", Toast.LENGTH_SHORT).show();
-        }
-    }
-
-    // ---------------- Chat ----------------
-    void sendMessage() {
-        String t = et.getText().toString().trim();
-        if (t.isEmpty()) return;
-        et.setText("");
-        addUser(t);
-        if (!modelInstalled) addBot("Model abhi install nahi hai. ⚙ Settings mein jakar Download Gemma model dabayein.");
-        else generateReply(t);
-    }
-
-    void addUser(String text) {
-        TextView m = tv(text, 16, TEXT, false);
-        m.setBackground(round(PANEL, 18));
-        m.setPadding(dp(16), dp(10), dp(16), dp(10));
-        m.setMaxWidth(dp(300));
-        m.setTextIsSelectable(true);
-        LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(-2, -2);
-        lp.gravity = Gravity.END;
-        lp.topMargin = dp(8);
-        chatBox.addView(m, lp);
-        toBottom();
-    }
-
-    void addBot(String text) {
-        LinearLayout box = new LinearLayout(this);
-        box.setOrientation(LinearLayout.VERTICAL);
-        box.addView(tv("Dev Orus", 14, NAVY, true));
-        TextView m = tv(text, 17, TEXT, false);
-        m.setLineSpacing(0, 1.25f);
-        m.setTextIsSelectable(true);
-        box.addView(m);
-        LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(-1, -2);
-        lp.topMargin = dp(14);
-        chatBox.addView(box, lp);
-        toBottom();
-    }
-
-    void toBottom() { scroll.post(() -> scroll.fullScroll(View.FOCUS_DOWN)); }
-
-    @Override
-    public void onBackPressed() {
-        if (settings.getVisibility() == View.VISIBLE) settings.setVisibility(View.GONE);
-        else super.onBackPressed();
-    }
-
-    // ---------------- Helpers ----------------
-    int dp(int v) { return Math.round(v * getResources().getDisplayMetrics().density); }
-
-    TextView tv(String s, int sp, int color, boolean bold) {
-        TextView t = new TextView(this);
-        t.setText(s);
-        t.setTextSize(sp);
-        t.setTextColor(color);
-        if (bold) t.setTypeface(Typeface.DEFAULT_BOLD);
-        return t;
-    }
-
-    TextView button(String s, int bg, int fg) {
-        TextView t = tv(s, 15, fg, true);
-        t.setGravity(Gravity.CENTER);
-        t.setBackground(round(bg, 8));
-        t.setPadding(dp(12), dp(16), dp(12), dp(16));
-        return t;
-    }
-
-    LinearLayout.LayoutParams btnParams() {
-        LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(-1, -2);
-        lp.topMargin = dp(14);
-        return lp;
-    }
-
-    GradientDrawable round(int color, int radiusDp) {
-        GradientDrawable g = new GradientDrawable();
-        g.setColor(color);
-        g.setCornerRadius(dp(radiusDp));
-        return g;
-    }
-
-    View divider() {
-        View v = new View(this);
-        v.setBackgroundColor(LINE);
-        v.setLayoutParams(new LinearLayout.LayoutParams(-1, dp(1)));
-        return v;
-    }
-}
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:paddingTop="7dp"
+            android:text="Dev Orus can make mistakes. Check important information."
+            android:textColor="#A0A4AD"
+            android:textSize="10sp" />
+    </LinearLayout>
+</LinearLayout>
