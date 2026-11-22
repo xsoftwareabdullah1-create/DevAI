@@ -2,7 +2,7 @@
   "name": "Dev Orus 1.1 — Complete Python Course",
   "version": "1.0.0",
   "scope": "Python only. C and C++ are deliberately excluded until the Python final assessment is passed.",
-  "teaching_policy": "Teach in sequence. Each module must include clear explanations, correct examples, expected output, common mistakes, practice questions, worked solutions and unseen evaluation. Do not mark a module mastered from reading alone.",
+  "teaching_policy": "Use the complete and advanced reference materials as one integrated curriculum, not one tiny lesson per conversation. Teach explanations, runnable examples, expected outputs, edge cases, exercises, worked solutions, debugging and unseen evaluation. Do not mark mastery from reading or retrieval alone.",
   "completion_policy": "Python is complete only after all modules and capstone projects are covered and the learner passes a cumulative unseen assessment. Dataset records and retrieval examples are not neural weight training.",
   "modules": [
     {
@@ -324,5 +324,24 @@
     ],
     "mastery": "At least 80% on the module assessment, with all critical correctness and safety checks passing; retry weak topics before advancing.",
     "final": "Mixed unseen tasks covering syntax, data model, control flow, functions, collections, files, exceptions, OOP, iterators, typing, testing, concurrency and application design."
-  }
+  },
+  "materials": [
+    {
+      "title": "Complete Python Handbook",
+      "path": "data/curriculum/python/COMPLETE_PYTHON_HANDBOOK.md",
+      "status": "written_reference"
+    },
+    {
+      "title": "Advanced Python Masterclass",
+      "path": "data/curriculum/python/ADVANCED_PYTHON_MASTERCLASS.md",
+      "status": "written_reference"
+    },
+    {
+      "title": "Getting Started Lesson",
+      "path": "data/curriculum/python/lesson-001-getting-started.md",
+      "status": "lesson_written"
+    }
+  ],
+  "material_status": "complete_and_advanced_reference_material_written",
+  "mastery_status": "not_assessed"
 }
