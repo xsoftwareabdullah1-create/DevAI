@@ -45,8 +45,8 @@ The project may use ordinary development libraries and build tools, but those mu
 ## 2. Current development status
 
 <blockquote>
-  <strong>Research prototype — not yet a trained conversational model.</strong><br/>
-  The current code contains a byte-level BPE tokenizer and a tiny decoder-only Transformer forward pass. Backpropagation, an optimizer, a complete training loop, learned checkpoints, autoregressive response generation, and a real chat interface are still pending.
+  <strong>Early offline chat prototype — limited retrieval, not a generative language model.</strong><br/>
+  The Android app now has a chat-first interface and trains a local character n-gram TF-IDF retrieval index from the bundled 210-record multilingual starter corpus at launch. It selects the closest stored response. Transformer backpropagation, an optimizer, learned neural checkpoints, and autoregressive generation are still pending.
 </blockquote>
 
 | Component | Current status |
@@ -61,8 +61,10 @@ The project may use ordinary development libraries and build tools, but those mu
 | Full model training loop | Not implemented |
 | Persistent learned checkpoints | Not implemented |
 | Autoregressive chat generation | Not implemented |
-| Chat-first interface | Implemented (early prototype) |\n| Offline corpus retrieval | Implemented (TF-IDF character n-grams) |
-| Offline retrieval chat | Early prototype; limited to corpus matches |\n| Generative conversational AI | Future milestone |
+| Chat-first interface | Implemented (early prototype) |
+| Offline corpus retrieval | Implemented (TF-IDF character n-grams) |
+| Offline retrieval chat | Early prototype; limited to corpus matches |
+| Generative conversational AI | Future milestone |
 
 The chat currently uses a small corpus-trained retrieval index, not the random Transformer. It can return a stored response when a prompt is sufficiently similar to one of the 210 examples. It does not synthesize novel answers, reliably handle unseen topics, or maintain semantic multi-turn context. The Transformer remains an experimental forward-pass component and has no training loop.
 
