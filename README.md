@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="https://raw.githubusercontent.com/xsoftwareabdullah1-create/DevAI/main/assets/branding/devai-logo.svg" alt="DevAI app logo" width="180" />
+  <img src="https://raw.githubusercontent.com/xsoftwareabdullah1-create/DevAI/main/assets/branding/devai-logo.svg" alt="DevAI minimalist monogram logo" width="150" />
 </p>
 
 <p align="center">
