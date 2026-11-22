@@ -233,7 +233,9 @@ public final class MainActivity extends Activity {
         modelButton.setText("Loading model…");
         status.setText("Loading Gemma 4 E2B · This can take a little time…");
         new Thread(() -> {
-            String result = nativeInitGemma(model.getAbsolutePath());
+            CrashDiagnostics.record(this, "Gemma initialization started; model bytes=" + model.length());
+            String result = ensureNativeLoaded() ? nativeInitGemma(model.getAbsolutePath()) : "Native library load failed; open Crash report.";
+            CrashDiagnostics.record(this, "Gemma initialization finished: " + result);
             boolean success = "READY".equals(result);
             runOnUiThread(() -> {
                 loading = false;
@@ -262,7 +264,9 @@ public final class MainActivity extends Activity {
         loading = true;
 
         new Thread(() -> {
-            String raw = nativeGenerate(question);
+            CrashDiagnostics.record(this, "Inference started; prompt chars=" + question.length());
+            String raw = ensureNativeLoaded() ? nativeGenerate(question) : "{\\"error\\":\\"Native library unavailable. Open Crash report.\\"}";
+            CrashDiagnostics.record(this, "Inference returned");
             String answer = extractAnswer(raw);
             runOnUiThread(() -> {
                 addMessage("Dev Orus 1.1", answer, false);
@@ -318,7 +322,8 @@ public final class MainActivity extends Activity {
 
     @Override
     protected void onDestroy() {
-        if (ready) nativeShutdownGemma();
+        CrashDiagnostics.record(this, "Activity onDestroy");
+        if (ready && nativeLoaded) nativeShutdownGemma();
         super.onDestroy();
     }
 }
