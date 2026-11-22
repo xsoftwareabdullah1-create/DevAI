@@ -15,6 +15,7 @@ public final class MainActivity extends Activity {
     private native String nativeTrainTokenizer(String corpus, int mergeCount);
     private native int[] nativeEncode(String text);
     private native String nativeDecode(int[] ids);
+    private native String nativeRunTransformer(int[] tokenIds);
 
     private EditText trainingText;
     private EditText inputText;
@@ -31,6 +32,7 @@ public final class MainActivity extends Activity {
         Button train = findViewById(R.id.trainButton);
         Button encode = findViewById(R.id.encodeButton);
         Button decode = findViewById(R.id.decodeButton);
+        Button forward = findViewById(R.id.forwardButton);
         outputText.setText(nativeTokenizerInfo());
 
         train.setOnClickListener(v -> outputText.setText(
@@ -47,6 +49,13 @@ public final class MainActivity extends Activity {
                 outputText.setText("Train the tokenizer and encode text first.");
             } else {
                 outputText.setText("Decoded text:\n" + nativeDecode(lastTokenIds));
+            }
+        });
+        forward.setOnClickListener(v -> {
+            if (lastTokenIds.length == 0) {
+                outputText.setText("Encode some text first. The Transformer accepts up to 64 token IDs.");
+            } else {
+                outputText.setText(nativeRunTransformer(lastTokenIds));
             }
         });
     }
