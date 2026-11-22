@@ -43,20 +43,26 @@ This is a forward-pass reference implementation only. It does not learn from dat
 
 The current corpus contains 198 original records (174 earlier records plus 24 advanced contextual dialogue records; 66 records per language). The separate 200,000-record conversation target is a planned expansion, not an existing dataset. See [CONVERSATION_CORPUS_PLAN.md](CONVERSATION_CORPUS_PLAN.md) for allocation and quality gates. They do not change model weights until a training pipeline exists. Casual prompts should be handled politely and playfully when appropriate, not labeled as stupid; unclear prompts should invite clarification.
 
-## Milestone 5 — Training engine
+## Milestone 5 — Response quality and evaluation contract
+- [x] Define all-round response quality standard across conversation, knowledge, coding, reasoning, creativity and everyday topics
+- [x] Define answer calibration, context-use, language-quality and detail-selection rubric
+- [ ] Build a held-out multilingual evaluation suite and reviewer scoring workflow
+- [ ] Add automated factuality, duplicate and multi-turn regression checks where measurable
+
+## Milestone 6 — Training engine
 - [ ] Next-token cross-entropy loss
 - [ ] Backpropagation and gradient checks
 - [ ] AdamW and gradient clipping
 - [ ] Mini-batch training and validation loop
 - [ ] Checkpoint save/load and resume
 
-## Milestone 6 — Dataset pipeline and evaluation
+## Milestone 7 — Dataset pipeline and evaluation
 - [ ] Add scalable licensed local dataset import and provenance records
 - [x] Deterministic train/validation split (preparation utility only; training loop still pending)
 - [ ] Curriculum sampler: beginner → intermediate → advanced
 - [ ] Per-language evaluation and held-out loss reporting
 
-## Milestone 7 — Local chat and Android optimization
+## Milestone 8 — Local chat and Android optimization
 - [ ] Autoregressive sampling after model training
 - [ ] Persist model checkpoints and tokenizer assets
 - [ ] Profile arm64 CPU, memory, battery and thermals
