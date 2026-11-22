@@ -265,7 +265,7 @@ public final class MainActivity extends Activity {
 
         new Thread(() -> {
             CrashDiagnostics.record(this, "Inference started; prompt chars=" + question.length());
-            String raw = ensureNativeLoaded() ? nativeGenerate(question) : "{\\"error\\":\\"Native library unavailable. Open Crash report.\\"}";
+            String raw = ensureNativeLoaded() ? nativeGenerate(question) : "{\"error\":\"Native library unavailable. Open Crash report.\"}";
             CrashDiagnostics.record(this, "Inference returned");
             String answer = extractAnswer(raw);
             runOnUiThread(() -> {
