@@ -1,6 +1,6 @@
 # DevAI starter knowledge corpus
 
-This is a small, original, hand-authored seed corpus for testing the future local training pipeline. It contains beginner general-knowledge question/answer pairs and ordinary conversational examples (greetings, thanks, jokes, riddles, boredom and playful nonsense) in English, Hindi and Urdu.
+This is a original, hand-authored starter corpus for testing the future local training pipeline. It contains beginner general-knowledge question/answer pairs and ordinary conversational examples (greetings, thanks, jokes, riddles, boredom and playful nonsense) in English, Hindi and Urdu.
 
 ## Format
 
