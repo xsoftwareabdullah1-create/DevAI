@@ -1,32 +1,31 @@
 # DevAI technical roadmap
 
-This roadmap deliberately separates a working Android foundation from actual model capability.
+This roadmap distinguishes tokenizer experiments from actual learned language-model capability.
 
 ## Milestone 1 — Android/JNI foundation
 
 - [x] Java activity and XML layout
 - [x] CMake C++ shared library
 - [x] JNI bridge
-- [x] Reversible byte encoding demonstration
-- [ ] Instrumented test on a physical ARM64 Android device
-- [ ] Unicode edge-case tests (including supplementary characters)
+- [x] Reversible byte encoding prototype
 
-## Milestone 2 — Tokenizer
+## Milestone 2 — Experimental byte-level BPE tokenizer
 
-Implement a byte-level BPE tokenizer from scratch:
+- [x] Start from individual byte symbols (IDs 0–255)
+- [x] Count adjacent symbol pairs in user-supplied corpus
+- [x] Learn deterministic frequent-pair merges
+- [x] Encode text using learned merges
+- [x] Decode token IDs back to bytes
+- [ ] Persist vocabulary and merge ranks to a versioned file
+- [ ] Add repeatable fixtures and native unit tests
+- [ ] Test malformed input and supplementary Unicode characters
+- [ ] Move training off the UI thread and add input-size limits
 
-1. Define reserved special tokens.
-2. Count adjacent symbol pairs over a documented training corpus.
-3. Iteratively merge the most frequent eligible pair.
-4. Persist merge ranks and vocabulary in a versioned format.
-5. Implement deterministic encode/decode.
-6. Test round trips, unknown input, malformed files, and Unicode.
-
-The current byte encoder is not BPE and does not learn merges.
+The current implementation is educational and uses JNI modified UTF-8 strings. It is not yet a production tokenizer.
 
 ## Milestone 3 — Transformer forward pass
 
-Start with a tiny configuration suitable for numerical testing:
+Start with tiny deterministic tensors suitable for numerical testing:
 
 - decoder-only causal Transformer
 - token embeddings
@@ -36,11 +35,11 @@ Start with a tiny configuration suitable for numerical testing:
 - SwiGLU feed-forward layers
 - language-model output projection
 
-Use small deterministic tensors and compare intermediate results against independently calculated reference values.
+Compare intermediate values against independently calculated reference results.
 
-## Milestone 4 — Training
+## Milestone 4 — Training engine
 
-Implement:
+Implement and test:
 
 - next-token cross-entropy loss
 - gradient computation / backpropagation
@@ -54,12 +53,12 @@ Do not call a model trained until weights have actually been updated and validat
 
 ## Milestone 5 — Data
 
-Use only datasets whose licenses and terms permit the intended use. Store source, license, retrieval date, preprocessing steps, and split metadata. Keep validation examples out of training.
+Use only datasets whose licenses and terms permit the intended use. Record source, license, retrieval date, preprocessing, and split metadata. Keep validation examples out of training.
 
 ## Milestone 6 — Android inference and chat
 
-Add a generation API after the forward pass is correct. Keep inference local and remove all network dependencies. Add cancellation, bounded context, and memory-aware execution.
+Add autoregressive generation only after the forward pass is correct. Keep inference local and network-independent. Add cancellation, bounded context, and memory-aware execution.
 
 ## Scaling policy
 
-A 100M-parameter model is a long-term architecture target, not a realistic first on-device training run. Measure peak RAM, sustained speed, battery impact, and thermal throttling at each scale. The application must checkpoint and stop safely under memory or thermal pressure.
+A 100M-parameter model is a long-term architecture target, not a realistic first on-device training run. Measure peak RAM, sustained speed, battery impact, and thermal throttling at each scale. Checkpoint and stop safely under memory or thermal pressure.
