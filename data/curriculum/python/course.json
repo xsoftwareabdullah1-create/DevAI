@@ -1,0 +1,328 @@
+{
+  "name": "Dev Orus 1.1 — Complete Python Course",
+  "version": "1.0.0",
+  "scope": "Python only. C and C++ are deliberately excluded until the Python final assessment is passed.",
+  "teaching_policy": "Teach in sequence. Each module must include clear explanations, correct examples, expected output, common mistakes, practice questions, worked solutions and unseen evaluation. Do not mark a module mastered from reading alone.",
+  "completion_policy": "Python is complete only after all modules and capstone projects are covered and the learner passes a cumulative unseen assessment. Dataset records and retrieval examples are not neural weight training.",
+  "modules": [
+    {
+      "number": 1,
+      "title": "Python overview, use cases, implementation and language versions",
+      "level": "beginner",
+      "status": "lesson_001_written"
+    },
+    {
+      "number": 2,
+      "title": "Installing Python, interpreter, REPL, scripts, PATH and running files",
+      "level": "beginner",
+      "status": "planned"
+    },
+    {
+      "number": 3,
+      "title": "Syntax, statements, expressions, indentation, comments and docstrings",
+      "level": "beginner",
+      "status": "planned"
+    },
+    {
+      "number": 4,
+      "title": "Names, variables, assignment, identity and naming conventions",
+      "level": "beginner",
+      "status": "planned"
+    },
+    {
+      "number": 5,
+      "title": "Built-in scalar types: int, float, complex, bool and NoneType",
+      "level": "beginner",
+      "status": "planned"
+    },
+    {
+      "number": 6,
+      "title": "Numeric operators, precedence, floor division, modulo and exponentiation",
+      "level": "beginner",
+      "status": "planned"
+    },
+    {
+      "number": 7,
+      "title": "Strings, indexing, slicing, Unicode, methods and formatting",
+      "level": "beginner",
+      "status": "planned"
+    },
+    {
+      "number": 8,
+      "title": "Type conversion, truthiness, equality, identity and comparison chaining",
+      "level": "beginner",
+      "status": "planned"
+    },
+    {
+      "number": 9,
+      "title": "Boolean logic, short-circuit evaluation and conditional expressions",
+      "level": "beginner",
+      "status": "planned"
+    },
+    {
+      "number": 10,
+      "title": "if, elif, else, match/case and structural pattern matching",
+      "level": "beginner",
+      "status": "planned"
+    },
+    {
+      "number": 11,
+      "title": "while, for, range, enumerate, zip, break, continue and loop else",
+      "level": "beginner",
+      "status": "planned"
+    },
+    {
+      "number": 12,
+      "title": "Lists, tuples, sequence operations, slicing and copying",
+      "level": "beginner",
+      "status": "planned"
+    },
+    {
+      "number": 13,
+      "title": "Dictionaries, sets, membership, hashing and mapping operations",
+      "level": "beginner",
+      "status": "planned"
+    },
+    {
+      "number": 14,
+      "title": "Comprehensions and generator expressions",
+      "level": "beginner",
+      "status": "planned"
+    },
+    {
+      "number": 15,
+      "title": "Functions, definition, calling, return, docstrings and annotations",
+      "level": "beginner",
+      "status": "planned"
+    },
+    {
+      "number": 16,
+      "title": "Positional, keyword, default, variadic and keyword-only parameters",
+      "level": "beginner",
+      "status": "planned"
+    },
+    {
+      "number": 17,
+      "title": "Argument unpacking, scope, LEGB, closures and global/nonlocal",
+      "level": "beginner",
+      "status": "planned"
+    },
+    {
+      "number": 18,
+      "title": "Recursion, base cases, recursion limits and iterative alternatives",
+      "level": "beginner",
+      "status": "planned"
+    },
+    {
+      "number": 19,
+      "title": "Lambda, map, filter, sorted and key functions",
+      "level": "intermediate",
+      "status": "planned"
+    },
+    {
+      "number": 20,
+      "title": "Modules, imports, import search path and __name__",
+      "level": "intermediate",
+      "status": "planned"
+    },
+    {
+      "number": 21,
+      "title": "Packages, __init__, relative imports and project layouts",
+      "level": "intermediate",
+      "status": "planned"
+    },
+    {
+      "number": 22,
+      "title": "Standard library tour: pathlib, os, sys, math, statistics, random, datetime",
+      "level": "intermediate",
+      "status": "planned"
+    },
+    {
+      "number": 23,
+      "title": "Exceptions, exception hierarchy, raise, try/except/else/finally and custom exceptions",
+      "level": "intermediate",
+      "status": "planned"
+    },
+    {
+      "number": 24,
+      "title": "File I/O, text/binary modes, encodings, buffering and pathlib",
+      "level": "intermediate",
+      "status": "planned"
+    },
+    {
+      "number": 25,
+      "title": "Context managers, with, contextlib and resource cleanup",
+      "level": "intermediate",
+      "status": "planned"
+    },
+    {
+      "number": 26,
+      "title": "JSON, CSV, serialization and data validation",
+      "level": "intermediate",
+      "status": "planned"
+    },
+    {
+      "number": 27,
+      "title": "Regular expressions with re",
+      "level": "intermediate",
+      "status": "planned"
+    },
+    {
+      "number": 28,
+      "title": "Iterables, iterators, iterator protocol and StopIteration",
+      "level": "intermediate",
+      "status": "planned"
+    },
+    {
+      "number": 29,
+      "title": "Generators, yield, yield from, lazy evaluation and generator pipelines",
+      "level": "intermediate",
+      "status": "planned"
+    },
+    {
+      "number": 30,
+      "title": "Decorators, closures, functools.wraps and parameterized decorators",
+      "level": "intermediate",
+      "status": "planned"
+    },
+    {
+      "number": 31,
+      "title": "Object-oriented programming, classes, instances, attributes and methods",
+      "level": "intermediate",
+      "status": "planned"
+    },
+    {
+      "number": 32,
+      "title": "Constructors, __init__, __new__, representation and comparison dunder methods",
+      "level": "intermediate",
+      "status": "planned"
+    },
+    {
+      "number": 33,
+      "title": "Encapsulation conventions, properties, descriptors and attribute lookup",
+      "level": "intermediate",
+      "status": "planned"
+    },
+    {
+      "number": 34,
+      "title": "Inheritance, overriding, super, MRO and multiple inheritance",
+      "level": "intermediate",
+      "status": "planned"
+    },
+    {
+      "number": 35,
+      "title": "Composition, protocols, abstract base classes and duck typing",
+      "level": "intermediate",
+      "status": "planned"
+    },
+    {
+      "number": 36,
+      "title": "Dataclasses, enums, slots and object model trade-offs",
+      "level": "intermediate",
+      "status": "planned"
+    },
+    {
+      "number": 37,
+      "title": "Type hints, typing, unions, generics, Protocol and static checking",
+      "level": "advanced",
+      "status": "planned"
+    },
+    {
+      "number": 38,
+      "title": "Virtual environments, pip, dependency pinning and reproducible installs",
+      "level": "advanced",
+      "status": "planned"
+    },
+    {
+      "number": 39,
+      "title": "Project packaging, pyproject.toml, wheels and entry points",
+      "level": "advanced",
+      "status": "planned"
+    },
+    {
+      "number": 40,
+      "title": "Unit testing with unittest, test discovery, fixtures and mocks",
+      "level": "advanced",
+      "status": "planned"
+    },
+    {
+      "number": 41,
+      "title": "Debugging, tracebacks, pdb, logging and diagnostics",
+      "level": "advanced",
+      "status": "planned"
+    },
+    {
+      "number": 42,
+      "title": "Code quality, formatting, linting, documentation and maintainability",
+      "level": "advanced",
+      "status": "planned"
+    },
+    {
+      "number": 43,
+      "title": "Networking fundamentals and HTTP clients with standard library concepts",
+      "level": "advanced",
+      "status": "planned"
+    },
+    {
+      "number": 44,
+      "title": "Databases, sqlite3, transactions, parameterized queries and data integrity",
+      "level": "advanced",
+      "status": "planned"
+    },
+    {
+      "number": 45,
+      "title": "Concurrency models: threads, processes, GIL and when to use each",
+      "level": "advanced",
+      "status": "planned"
+    },
+    {
+      "number": 46,
+      "title": "Async programming: asyncio, coroutines, tasks, cancellation and timeouts",
+      "level": "advanced",
+      "status": "planned"
+    },
+    {
+      "number": 47,
+      "title": "Performance measurement, profiling, algorithmic complexity and memory",
+      "level": "advanced",
+      "status": "planned"
+    },
+    {
+      "number": 48,
+      "title": "Robust input validation, secure file handling, secrets and safe subprocess use",
+      "level": "advanced",
+      "status": "planned"
+    },
+    {
+      "number": 49,
+      "title": "Data structures and algorithms implemented in Python",
+      "level": "advanced",
+      "status": "planned"
+    },
+    {
+      "number": 50,
+      "title": "Capstone: tested command-line utility, file processor and small application",
+      "level": "advanced",
+      "status": "planned"
+    },
+    {
+      "number": 51,
+      "title": "Final assessment: unseen code reading, writing, debugging and design tasks",
+      "level": "advanced",
+      "status": "planned"
+    }
+  ],
+  "assessment": {
+    "per_module": [
+      "concept explanation",
+      "annotated example",
+      "predict the output",
+      "write a short program",
+      "find and fix a bug",
+      "boundary and invalid-input cases",
+      "unseen transfer exercise"
+    ],
+    "mastery": "At least 80% on the module assessment, with all critical correctness and safety checks passing; retry weak topics before advancing.",
+    "final": "Mixed unseen tasks covering syntax, data model, control flow, functions, collections, files, exceptions, OOP, iterators, typing, testing, concurrency and application design."
+  }
+}
