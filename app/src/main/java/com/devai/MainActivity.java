@@ -45,6 +45,9 @@ public final class MainActivity extends Activity {
     private volatile boolean ready = false;
     private volatile boolean loading = false;
     private volatile boolean nativeLoaded = false;
+    // Separate from `loading`: downloading and inference also use that flag.
+    // This prevents a second refresh/tap from creating another LiteRT-LM engine.
+    private volatile boolean initializing = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -234,7 +237,12 @@ public final class MainActivity extends Activity {
     }
 
     private void initializeModel(File model) {
-        if (loading && ready) return;
+        if (ready || initializing) {
+            CrashDiagnostics.record(this, "Ignoring duplicate model initialization request; ready="
+                    + ready + ", initializing=" + initializing);
+            return;
+        }
+        initializing = true;
         loading = true;
         modelButton.setEnabled(false);
         modelButton.setText("Loading model…");
@@ -245,7 +253,15 @@ public final class MainActivity extends Activity {
             CrashDiagnostics.record(this, "Gemma initialization finished: " + result);
             boolean success = "READY".equals(result);
             runOnUiThread(() -> {
+                initializing = false;
                 loading = false;
+                if (isFinishing() || isDestroyed()) {
+                    if (success) nativeShutdownGemma();
+                    ready = false;
+                    CrashDiagnostics.record(getApplicationContext(),
+                            "Gemma initialization completed after Activity destruction; engine closed");
+                    return;
+                }
                 ready = success;
                 sendButton.setEnabled(success);
                 composer.setEnabled(success);
@@ -348,7 +364,13 @@ public final class MainActivity extends Activity {
     @Override
     protected void onDestroy() {
         CrashDiagnostics.record(this, "Activity onDestroy");
-        if (ready && nativeLoaded) nativeShutdownGemma();
+        if (nativeLoaded && (ready || initializing)) {
+            // JNI serializes shutdown against initialization/inference. Closing here also
+            // prevents the large model engine remaining resident after Activity teardown.
+            nativeShutdownGemma();
+            ready = false;
+            initializing = false;
+        }
         super.onDestroy();
     }
 }
