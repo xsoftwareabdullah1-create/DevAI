@@ -15,6 +15,7 @@ DevAI is an independently implemented language-model research project. It uses n
 - Input validation and a 2,000,000-parameter allocation guard.
 - Original 150-record starter corpus: beginner general knowledge and casual conversation in English, Hindi and Urdu.
 - Python standard-library validator for the JSONL corpus.
+- Deterministic train/validation split preparation that keeps translated variants of the same concept together.
 - No INTERNET permission, external inference API, or pretrained weights.
 
 ## Starter knowledge and casual conversation data
@@ -27,6 +28,7 @@ Validate the dataset:
 
 ```sh
 python3 scripts/validate_knowledge_dataset.py
+python3 scripts/prepare_dataset.py --seed 2026
 ```
 
 The starter corpus currently covers English, Hindi and Urdu only, with 50 examples per language. It includes beginner general knowledge and casual conversation, plus initial intermediate examples in economics and critical thinking. It is a small original seed set, not a comprehensive general-knowledge library. More languages and carefully reviewed, properly licensed data need to be added gradually.
@@ -49,7 +51,7 @@ Transformer tests cover finite logits, causal prefix invariance, deterministic i
 
 ## Important limitations
 
-- No backpropagation, optimizer, training loop, dataset batching, or learned checkpoint exists yet.
+- No backpropagation, optimizer, model training loop, or learned checkpoint exists yet. The new split utility only prepares leakage-resistant train/validation files; it does not train the Transformer.
 - Adding corpus files does not teach the current model. The Android forward-pass button reports the highest final-position logit only; it does not decode a response or constitute a chat assistant.
 - Weights are reinitialized on each JNI call; they are not persisted.
 - The starter corpus is intentionally small and is insufficient for useful language-model training.
