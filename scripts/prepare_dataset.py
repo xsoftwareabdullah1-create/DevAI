@@ -45,8 +45,6 @@ def load_records(path: Path) -> list[dict[str, Any]]:
         if not isinstance(item["response"], str) or not item["response"].strip():
             raise ValueError(f"line {line_number}: response must be non-empty")
         records.append(item)
-    if len(records) < 2:
-        raise ValueError("at least two records are required to create a split")
     return records
 
 
