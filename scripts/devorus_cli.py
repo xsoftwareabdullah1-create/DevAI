@@ -159,7 +159,7 @@ class LlamaServer:
 
 def save_history(path: Path, question: str, answer: str,
                  score: float | None, matched_prompt: str | None,
-                 backend: str) -> None:
+                 backend: str = "retrieval") -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     item = {
         "timestamp": datetime.now(timezone.utc).isoformat(),
