@@ -2,6 +2,7 @@ package com.devai;
 
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.Gravity;
 import android.view.inputmethod.EditorInfo;
@@ -23,7 +24,6 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 
 public final class MainActivity extends Activity {
-    static { System.loadLibrary("devai"); }
 
     private static final String MODEL_URL =
             "https://huggingface.co/litert-community/gemma-4-E2B-it-litert-lm/resolve/main/gemma-4-E2B-it.litertlm?download=true";
@@ -42,9 +42,12 @@ public final class MainActivity extends Activity {
     private Button modelButton;
     private volatile boolean ready = false;
     private volatile boolean loading = false;
+    private volatile boolean nativeLoaded = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        CrashDiagnostics.install(getApplicationContext());
+        CrashDiagnostics.record(getApplicationContext(), "MainActivity onCreate");
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         messages = findViewById(R.id.messages);
@@ -53,6 +56,9 @@ public final class MainActivity extends Activity {
         status = findViewById(R.id.status);
         sendButton = findViewById(R.id.sendButton);
         modelButton = findViewById(R.id.modelButton);
+        Button diagnosticsButton = findViewById(R.id.crashReportButton);
+        diagnosticsButton.setOnClickListener(v -> CrashDiagnostics.show(this));
+        if (CrashDiagnostics.hasReport(this)) diagnosticsButton.setVisibility(android.view.View.VISIBLE);
 
         addMessage("Dev Orus 1.1",
                 "Welcome. This build uses the Gemma 4 E2B model locally through LiteRT-LM. "
@@ -69,7 +75,23 @@ public final class MainActivity extends Activity {
             }
             return false;
         });
+        CrashDiagnostics.record(this, "UI ready; checking model");
         checkExistingModel();
+    }
+
+    private boolean ensureNativeLoaded() {
+        if (nativeLoaded) return true;
+        try {
+            CrashDiagnostics.record(this, "Loading libdevai.so");
+            System.loadLibrary("devai");
+            nativeLoaded = true;
+            CrashDiagnostics.record(this, "Native library loaded");
+            return true;
+        } catch (Throwable error) {
+            CrashDiagnostics.record(this, "Native library load failed: " + error);
+            status.setText("Native runtime error · Open Crash report");
+            return false;
+        }
     }
 
     private File modelFile() {
