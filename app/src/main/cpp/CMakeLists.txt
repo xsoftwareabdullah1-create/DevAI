@@ -4,6 +4,7 @@ project(devai LANGUAGES CXX)
 add_library(devai SHARED
     native_bridge.cpp
     tokenizer.cpp
+    transformer.cpp
 )
 
 find_library(log-lib log)
