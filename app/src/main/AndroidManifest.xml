@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
     <application
+        android:icon="@drawable/ic_devai_logo"
+        android:roundIcon="@drawable/ic_devai_logo"
         android:allowBackup="false"
         android:label="DevAI"
         android:supportsRtl="true"
