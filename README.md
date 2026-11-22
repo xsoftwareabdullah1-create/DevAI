@@ -90,7 +90,7 @@ DevAI/
 - The first model download is large and requires a stable connection and sufficient free storage.
 - Model initialization and generation speed depend on the phone's CPU, RAM, thermal limits, and Android build. CI compilation does not prove performance on every device.
 - This release configures the CPU backend for broad device compatibility. GPU/NPU acceleration is not enabled in this integration.
-- The current chat is text-first. General file attachments, document parsing, image generation, and multi-format file creation are not included in this release.
+- The current chat is text-first. You can attach any file type (+ button): text-based files and the text files inside `.zip` archives are read and passed to the model (capped at about 8,000 characters in total because of the on-device context window). Binary formats such as images, PDFs, Office files, or non-zip archives are attached by name only; the model cannot read their contents. Document parsing, image understanding, and file creation are not included.
 - The app does not train Gemma weights on the phone. The active language-generation engine uses the downloaded pretrained Gemma model.
 - No hosted inference API or paid API key is required.
 

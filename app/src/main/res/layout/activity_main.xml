@@ -190,6 +190,21 @@
             android:paddingEnd="14dp"
             android:paddingBottom="6dp">
 
+            <HorizontalScrollView
+                android:id="@+id/attachmentScroll"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="6dp"
+                android:scrollbars="none"
+                android:visibility="gone">
+
+                <LinearLayout
+                    android:id="@+id/attachmentBar"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal" />
+            </HorizontalScrollView>
+
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -197,10 +212,19 @@
                 android:gravity="bottom"
                 android:minHeight="56dp"
                 android:orientation="horizontal"
-                android:paddingStart="18dp"
+                android:paddingStart="6dp"
                 android:paddingEnd="8dp"
                 android:paddingTop="6dp"
                 android:paddingBottom="6dp">
+
+                <ImageButton
+                    android:id="@+id/attachButton"
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:layout_marginBottom="2dp"
+                    android:background="?android:attr/selectableItemBackgroundBorderless"
+                    android:contentDescription="Attach files"
+                    android:src="@drawable/ic_add" />
 
                 <EditText
                     android:id="@+id/composer"
@@ -214,6 +238,7 @@
                     android:inputType="textCapSentences|textMultiLine"
                     android:maxLines="6"
                     android:minHeight="44dp"
+                    android:paddingStart="6dp"
                     android:paddingEnd="8dp"
                     android:textColor="@color/text_primary"
                     android:textColorHint="@color/text_hint"
