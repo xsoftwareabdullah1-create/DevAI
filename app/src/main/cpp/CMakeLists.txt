@@ -10,7 +10,7 @@ if(NOT EXISTS "${LITERTLM_INCLUDE}/c/engine.h" OR NOT EXISTS "${LITERTLM_LIBRARY
 endif()
 
 add_library(litertlm SHARED IMPORTED GLOBAL)
-set_target_properties(litertlm PROPERTIES IMPORTED_LOCATION "${LITERTLM_LIBRARY}")
+set_target_properties(litertlm PROPERTIES\n    IMPORTED_LOCATION "${LITERTLM_LIBRARY}"\n    IMPORTED_SONAME "libLiteRtLm.so"\n)
 
 add_library(devai SHARED
     native_bridge.cpp
