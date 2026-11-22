@@ -1,4 +1,8 @@
 <p align="center">
+  <img src="https://raw.githubusercontent.com/xsoftwareabdullah1-create/DevAI/main/assets/branding/devai-logo.svg" alt="DevAI app logo" width="180" />
+</p>
+
+<p align="center">
   <strong>DevAI</strong><br/>
   <em>Independent offline AI research for Android</em>
 </p>
