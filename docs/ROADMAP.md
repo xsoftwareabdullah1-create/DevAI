@@ -24,8 +24,10 @@
 This is a forward-pass reference implementation only. It does not learn from data, persist weights, or generate meaningful chat.
 
 ## Milestone 4 — Beginner knowledge and conversation seed corpus
-- [x] Add original general-knowledge Q&A in English, Hindi and Urdu (126 knowledge records)
-- [x] Add friendly casual conversation examples: greetings, thanks, jokes, riddles, boredom and playful nonsense (24 conversation records)
+- [x] Add original general-knowledge Q&A in English, Hindi and Urdu (150+ knowledge and conversation records)
+- [x] Add friendly casual conversation examples: greetings, thanks, jokes, riddles, boredom and playful nonsense
+- [x] Add detailed everyday-life and discussion examples: communication, disagreements, digital footprint, misinformation, AI limitations, habits, money basics and complex questions
+- [x] Add response-style metadata for detailed answers
 - [x] Define UTF-8 JSONL record format with IDs, language, level, tags and provenance
 - [x] Add a Python standard-library dataset validator
 - [x] Add deterministic train/validation split preparation with concept-group isolation
