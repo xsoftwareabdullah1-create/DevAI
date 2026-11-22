@@ -17,8 +17,10 @@ This roadmap distinguishes tokenizer experiments from actual learned language-mo
 - [x] Encode text using learned merges
 - [x] Decode token IDs back to bytes
 - [x] Add initial host-side round-trip and determinism tests
-- [ ] Persist vocabulary and merge ranks to a versioned file
-- [ ] Test malformed input and supplementary Unicode characters
+- [x] Save/load merges using a versioned binary vocabulary format
+- [x] Test persistence round trips and reject malformed model files
+- [ ] Test supplementary Unicode characters end-to-end through JNI
+- [ ] Integrate vocabulary save/load into Android app-private storage
 - [ ] Move training off the UI thread and add input-size limits
 
 The current implementation is educational and uses JNI modified UTF-8 strings. It is not yet a production tokenizer.
