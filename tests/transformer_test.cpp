@@ -8,6 +8,10 @@ int main(){
  TransformerConfig c;c.vocabSize=300;c.dimension=16;c.heads=4;c.layers=1;c.feedForwardDimension=32;c.maxSequenceLength=16;c.seed=42;
  TinyTransformer model(c);assert(model.valid());const std::vector<int> ids{4,9,12,3};const auto logits=model.forward(ids);
  assert(logits.size()==ids.size()*static_cast<std::size_t>(c.vocabSize));for(float x:logits)assert(std::isfinite(x));
+ // Fixed-seed numeric regression values for the first position.
+ assert(close(logits[0],0.134259641f,1.0e-6f));
+ assert(close(logits[1],0.0539058484f,1.0e-6f));
+ assert(close(logits[2],0.162456080f,1.0e-6f));
  const auto longer=model.forward(std::vector<int>{4,9,12,3,17});assert(longer.size()==5u*c.vocabSize);
  for(std::size_t i=0;i<4u*c.vocabSize;++i)assert(close(logits[i],longer[i],2e-5f));
  TinyTransformer same(c);assert(same.forward(ids)==logits);c.seed=43;TinyTransformer other(c);assert(other.forward(ids)!=logits);
