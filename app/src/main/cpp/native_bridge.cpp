@@ -242,3 +242,155 @@ Java_com_devai_MainActivity_nativeAsk(JNIEnv* env, jobject, jstring question) {
     const std::string& answer = gRetrievalDocs[bestIndex].answer;
     return env->NewStringUTF(answer.c_str());
 }
+
+
+// Gemma-backed Dev Orus 1.1 inference through the official LiteRT-LM C API.
+// The Java/XML layer owns model download and lifecycle; this JNI layer owns
+// the native Engine and stateful Conversation.
+#include "c/engine.h"
+#include "c/conversation.h"
+#include "c/error_reporter.h"
+
+namespace {
+std::mutex gGemmaMutex;
+LiteRtLmEngine* gGemmaEngine = nullptr;
+LiteRtLmConversation* gGemmaConversation = nullptr;
+
+std::string gemmaLastError(const char* operation, LiteRtLmStatusCode status) {
+    const char* detail = litert_lm_get_last_error_message();
+    std::ostringstream out;
+    out << operation << " failed (status " << static_cast<int>(status) << ")";
+    if (detail && *detail) out << ": " << detail;
+    return out.str();
+}
+
+std::string jsonEscape(const std::string& value) {
+    std::ostringstream out;
+    for (unsigned char c : value) {
+        switch (c) {
+            case '"': out << "\\\""; break;
+            case '\\\\': out << "\\\\\\\\""; break;
+            case '\\b': out << "\\\\b"; break;
+            case '\\f': out << "\\\\f"; break;
+            case '\\n': out << "\\\\n"; break;
+            case '\\r': out << "\\\\r"; break;
+            case '\\t': out << "\\\\t"; break;
+            default:
+                if (c < 0x20) {
+                    const char* hex = "0123456789abcdef";
+                    out << "\\\\u00" << hex[c >> 4] << hex[c & 0x0f];
+                } else {
+                    out << static_cast<char>(c);
+                }
+        }
+    }
+    return out.str();
+}
+
+void closeGemmaLocked() {
+    if (gGemmaConversation) {
+        litert_lm_conversation_delete(gGemmaConversation);
+        gGemmaConversation = nullptr;
+    }
+    if (gGemmaEngine) {
+        litert_lm_engine_delete(gGemmaEngine);
+        gGemmaEngine = nullptr;
+    }
+}
+}
+
+extern "C" JNIEXPORT jstring JNICALL
+Java_com_devai_MainActivity_nativeInitGemma(JNIEnv* env, jobject, jstring modelPath) {
+    if (!modelPath) return env->NewStringUTF("Model path is empty.");
+    const char* pathChars = env->GetStringUTFChars(modelPath, nullptr);
+    if (!pathChars) return env->NewStringUTF("Could not read model path.");
+    const std::string path(pathChars);
+    env->ReleaseStringUTFChars(modelPath, pathChars);
+
+    std::lock_guard<std::mutex> lock(gGemmaMutex);
+    closeGemmaLocked();
+
+    LiteRtLmEngineSettings* settings = nullptr;
+    LiteRtLmStatusCode status =
+        litert_lm_engine_settings_create(path.c_str(), "cpu", nullptr, nullptr, &settings);
+    if (status != kLiteRtLmStatusOk) {
+        return env->NewStringUTF(gemmaLastError("LiteRT-LM settings", status).c_str());
+    }
+
+    status = litert_lm_engine_create(settings, &gGemmaEngine);
+    litert_lm_engine_settings_delete(settings);
+    if (status != kLiteRtLmStatusOk) {
+        closeGemmaLocked();
+        return env->NewStringUTF(gemmaLastError("Gemma engine initialization", status).c_str());
+    }
+
+    LiteRtLmSessionConfig* sessionConfig = nullptr;
+    LiteRtLmConversationConfig* conversationConfig = nullptr;
+    status = litert_lm_session_config_create(&sessionConfig);
+    if (status == kLiteRtLmStatusOk) {
+        status = litert_lm_session_config_set_max_output_tokens(sessionConfig, 512);
+    }
+    if (status == kLiteRtLmStatusOk) {
+        status = litert_lm_conversation_config_create(&conversationConfig);
+    }
+    if (status == kLiteRtLmStatusOk) {
+        status = litert_lm_conversation_config_set_session_config(
+            conversationConfig, sessionConfig);
+    }
+    const char* systemMessage =
+        "{\\"role\\":\\"system\\",\\"content\\":\\"You are Dev Orus 1.1, a helpful, "
+        "honest, clear and respectful offline assistant. Answer in the language used by "
+        "the user. Do not claim access to the internet. If unsure, say so.\\"}";
+    if (status == kLiteRtLmStatusOk) {
+        status = litert_lm_conversation_config_set_system_message(
+            conversationConfig, systemMessage);
+    }
+    if (status == kLiteRtLmStatusOk) {
+        status = litert_lm_conversation_create(
+            gGemmaEngine, conversationConfig, &gGemmaConversation);
+    }
+
+    if (conversationConfig) litert_lm_conversation_config_delete(conversationConfig);
+    if (sessionConfig) litert_lm_session_config_delete(sessionConfig);
+
+    if (status != kLiteRtLmStatusOk) {
+        const std::string error = gemmaLastError("Dev Orus conversation setup", status);
+        closeGemmaLocked();
+        return env->NewStringUTF(error.c_str());
+    }
+    return env->NewStringUTF("READY");
+}
+
+extern "C" JNIEXPORT jstring JNICALL
+Java_com_devai_MainActivity_nativeGenerate(JNIEnv* env, jobject, jstring prompt) {
+    if (!prompt) return env->NewStringUTF("Message is empty.");
+    const char* promptChars = env->GetStringUTFChars(prompt, nullptr);
+    if (!promptChars) return env->NewStringUTF("Could not read message.");
+    const std::string text(promptChars);
+    env->ReleaseStringUTFChars(prompt, promptChars);
+
+    std::lock_guard<std::mutex> lock(gGemmaMutex);
+    if (!gGemmaConversation) return env->NewStringUTF("Gemma model is not loaded.");
+    const std::string message =
+        "{\\"role\\":\\"user\\",\\"content\\":\\"" + jsonEscape(text) + "\\"}";
+    LiteRtLmJsonResponse* response = nullptr;
+    const LiteRtLmStatusCode status = litert_lm_conversation_send_message(
+        gGemmaConversation, message.c_str(), nullptr, nullptr, &response);
+    if (status != kLiteRtLmStatusOk) {
+        return env->NewStringUTF(gemmaLastError("Dev Orus generation", status).c_str());
+    }
+
+    const char* responseJson = nullptr;
+    const LiteRtLmStatusCode readStatus =
+        litert_lm_json_response_get_string(response, &responseJson);
+    std::string result = readStatus == kLiteRtLmStatusOk && responseJson
+        ? responseJson : "{\\"error\\":\\"The model returned an empty response.\\"}";
+    litert_lm_json_response_delete(response);
+    return env->NewStringUTF(result.c_str());
+}
+
+extern "C" JNIEXPORT void JNICALL
+Java_com_devai_MainActivity_nativeShutdownGemma(JNIEnv*, jobject) {
+    std::lock_guard<std::mutex> lock(gGemmaMutex);
+    closeGemmaLocked();
+}
