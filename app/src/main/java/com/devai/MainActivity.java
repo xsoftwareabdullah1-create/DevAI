@@ -60,7 +60,7 @@ public final class MainActivity extends Activity {
                 false);
         sendButton.setEnabled(false);
         composer.setEnabled(false);
-        modelButton.setOnClickListener(v -> confirmModelDownload());
+        modelButton.setOnClickListener(v -> onModelButtonClicked());
         sendButton.setOnClickListener(v -> sendMessage());
         composer.setOnEditorActionListener((v, actionId, event) -> {
             if (actionId == EditorInfo.IME_ACTION_SEND) {
@@ -87,6 +87,15 @@ public final class MainActivity extends Activity {
             status.setText("MODEL NOT INSTALLED · First-time download required");
             modelButton.setText("Download Gemma model · about 2.6 GB");
             modelButton.setEnabled(true);
+        }
+    }
+
+    private void onModelButtonClicked() {
+        File model = modelFile();
+        if (model != null && model.isFile() && model.length() >= MIN_MODEL_BYTES) {
+            initializeModel(model);
+        } else {
+            confirmModelDownload();
         }
     }
 
