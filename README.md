@@ -4,7 +4,7 @@
 
 DevAI is being developed as an independently implemented language model. Its tokenizer, neural-network architecture, initialization, training loop, and learned weights are intended to be created in this repository. It does not use pretrained model weights or external AI APIs.
 
-> Current status: Milestone 2 — experimental byte-level BPE tokenizer. The Android app can train merge rules from text entered by the user, encode text into token IDs, and decode those IDs. This is a tokenizer experiment, not a trained language model. Transformer inference and neural-network training are not implemented yet.
+> Current status: Milestone 2 — experimental byte-level BPE tokenizer with versioned vocabulary persistence. The native C++ core can train merges from user-provided text, encode/decode token IDs, and save/load the learned merge ranks. This is still a tokenizer experiment, not a trained language model.
 
 ## Principles
 
@@ -23,7 +23,8 @@ DevAI is being developed as an independently implemented language model. Its tok
 - JNI bridge for tokenizer operations.
 - Deterministic byte-level BPE merge training from user-provided text.
 - Token encode/decode using the learned merge list.
-- Host-side tokenizer tests and a standalone test runner.
+- Versioned binary tokenizer vocabulary save/load API in the native C++ core.
+- Host-side tokenizer tests for determinism, round trips, persistence, and malformed files.
 - No INTERNET permission and no network inference dependencies.
 
 ### Run native tokenizer tests
@@ -36,7 +37,7 @@ sh tests/run_tokenizer_tests.sh
 
 ### Tokenizer limitations
 
-This is an educational first BPE implementation. It learns at most 128 merges from the text pasted into the app; it does not yet persist vocabulary files, handle large corpora efficiently, or implement a production-grade Unicode normalization/pre-tokenization pipeline. JNI currently uses Android's modified UTF-8 string interface, so supplementary Unicode characters need dedicated boundary tests before claiming full Unicode correctness.
+This is an educational first BPE implementation. It learns at most 128 merges from text entered into the app; it does not yet have Android UI controls for saving/loading vocabulary files, efficient large-corpus training, or a production-grade Unicode normalization/pre-tokenization pipeline. JNI currently uses Android's modified UTF-8 string interface, so supplementary Unicode characters need dedicated boundary tests before claiming full Unicode correctness.
 
 Tokenizer training does not train neural-network weights. The app is not yet a conversational AI.
 
@@ -60,13 +61,14 @@ Open the project in Android Studio, install the requested SDK/NDK components, sy
 1. [x] Android/JNI foundation and byte encoding prototype.
 2. [x] Experimental byte-level BPE training and encode/decode.
 3. [x] Initial host-side tokenizer tests.
-4. [ ] Persist tokenizer vocabulary and merge ranks.
-5. [ ] Implement a tiny decoder-only Transformer forward pass.
-6. [ ] Implement gradients, AdamW, gradient clipping, and checkpointing.
-7. [ ] Add licensed training/validation datasets and reproducible training configs.
-8. [ ] Train a small randomly initialized model and report measured validation loss.
-9. [ ] Add local autoregressive inference and connect it to chat.
-10. [ ] Profile memory, speed, battery and thermals on physical Android devices.
+4. [x] Versioned native vocabulary save/load and persistence tests.
+5. [ ] Integrate tokenizer persistence with Android app-private storage.
+6. [ ] Implement a tiny decoder-only Transformer forward pass.
+7. [ ] Implement gradients, AdamW, gradient clipping, and checkpointing.
+8. [ ] Add licensed training/validation datasets and reproducible training configs.
+9. [ ] Train a small randomly initialized model and report measured validation loss.
+10. [ ] Add local autoregressive inference and connect it to chat.
+11. [ ] Profile memory, speed, battery and thermals on physical Android devices.
 
 ## Scaling reality
 
