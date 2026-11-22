@@ -1,0 +1,20 @@
+name: Native C++ tests
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  native-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+      - name: Install C++ toolchain
+        run: sudo apt-get update && sudo apt-get install -y g++
+      - name: Run tokenizer tests
+        run: sh tests/run_tokenizer_tests.sh
+      - name: Run Transformer tests
+        run: sh tests/run_transformer_tests.sh
