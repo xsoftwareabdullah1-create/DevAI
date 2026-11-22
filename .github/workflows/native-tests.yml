@@ -18,3 +18,5 @@ jobs:
         run: sh tests/run_tokenizer_tests.sh
       - name: Run Transformer tests
         run: sh tests/run_transformer_tests.sh
+      - name: Validate knowledge dataset
+        run: python3 scripts/validate_knowledge_dataset.py
