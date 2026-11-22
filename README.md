@@ -4,7 +4,7 @@
 
 DevAI is an independently implemented language-model research project. It uses no pretrained model weights and no external AI inference APIs. The current code includes an experimental tokenizer, a small C++ decoder-only Transformer forward pass, and an original multilingual starter corpus.
 
-> **Current status: forward-pass prototype + starter dataset.** The app can train a byte-level BPE tokenizer from supplied text, encode/decode IDs, and run a tiny randomly initialized Transformer. A 150-record curriculum corpus is now included for future training-pipeline work. The model has **not** learned this corpus yet and does not produce meaningful chat.
+> **Current status: forward-pass prototype + starter dataset.** The app can train a byte-level BPE tokenizer from supplied text, encode/decode IDs, and run a tiny randomly initialized Transformer. A 174-record multilingual starter corpus now includes everyday-life discussions, digital literacy, critical thinking and detailed-answer examples—not just school facts. The model has **not** learned this corpus yet and does not produce meaningful chat.
 
 ## Implemented
 
@@ -13,7 +13,8 @@ DevAI is an independently implemented language-model research project. It uses n
 - Decoder-only Transformer forward pass with token embeddings, RMSNorm, causal multi-head self-attention, RoPE, SwiGLU feed-forward layers, residual connections and vocabulary logits.
 - Deterministic random initialization from a configurable seed.
 - Input validation and a 2,000,000-parameter allocation guard.
-- Original 150-record starter corpus: beginner general knowledge and casual conversation in English, Hindi and Urdu.
+- Original 174-record starter corpus: general knowledge, casual conversation, everyday-life topics and detailed discussions in English, Hindi and Urdu.
+- Optional `response_style: detailed` metadata marks examples intended to teach structured, longer explanations.
 - Python standard-library validator for the JSONL corpus.
 - Deterministic train/validation split preparation that keeps translated variants of the same concept together.
 - No INTERNET permission, external inference API, or pretrained weights.
@@ -31,7 +32,7 @@ python3 scripts/validate_knowledge_dataset.py
 python3 scripts/prepare_dataset.py --seed 2026
 ```
 
-The starter corpus currently covers English, Hindi and Urdu only, with 50 examples per language. It includes beginner general knowledge and casual conversation, plus initial intermediate examples in economics and critical thinking. It is a small original seed set, not a comprehensive general-knowledge library. More languages and carefully reviewed, properly licensed data need to be added gradually.
+The starter corpus currently covers English, Hindi and Urdu only, with 58 examples per language. It spans academic facts, everyday life, communication, digital literacy, misinformation, AI limitations, money basics and complex discussions across basic, intermediate and advanced levels. It is a small original seed set, not a comprehensive general-knowledge library. More languages and carefully reviewed, properly licensed data need to be added gradually.
 
 ## Tiny Android configuration
 
