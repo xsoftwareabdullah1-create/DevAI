@@ -3,7 +3,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:background="#0B1020">
+    android:background="#F6F8FC">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -17,14 +17,14 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="DevAI"
-            android:textColor="#EAF2FF"
+            android:textColor="#172238"
             android:textSize="27sp"
             android:textStyle="bold" />
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Dev Orus 1.1"
-            android:textColor="#65D6C4"
+            android:textColor="#087F72"
             android:textSize="15sp"
             android:textStyle="bold" />
         <TextView
@@ -32,15 +32,21 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="4dp"
-            android:text="OFFLINE · Loading knowledge…"
-            android:textColor="#8FA8C8"
+            android:text="MODEL NOT INSTALLED · First-time download required"
+            android:textColor="#64748B"
             android:textSize="12sp" />
+        <Button
+            android:id="@+id/modelButton"
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:layout_marginTop="10dp"
+            android:text="Download Gemma model · about 2.6 GB" />
     </LinearLayout>
 
     <View
         android:layout_width="match_parent"
         android:layout_height="1dp"
-        android:background="#26344B" />
+        android:background="#DCE4EF" />
 
     <ScrollView
         android:id="@+id/chatScroll"
@@ -62,7 +68,7 @@
     <View
         android:layout_width="match_parent"
         android:layout_height="1dp"
-        android:background="#26344B" />
+        android:background="#DCE4EF" />
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -75,14 +81,14 @@
             android:layout_width="0dp"
             android:layout_height="52dp"
             android:layout_weight="1"
-            android:backgroundTint="#65D6C4"
+            android:backgroundTint="#087F72"
             android:hint="Message Dev Orus…"
             android:imeOptions="actionSend"
             android:inputType="textCapSentences|textMultiLine"
             android:maxLines="4"
             android:paddingStart="12dp"
             android:paddingEnd="12dp"
-            android:textColor="#FFFFFF"
+            android:textColor="#172238"
             android:textColorHint="#8190A8" />
         <Button
             android:id="@+id/sendButton"
