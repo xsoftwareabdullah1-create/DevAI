@@ -18,12 +18,13 @@ DevAI is the Android application and **Dev Orus 1.1** is the assistant identity 
 
 This is an integration release, not a claim that the Gemma weights were independently trained by this repository. The underlying model remains Gemma 4 E2B and is attributed to Google in this documentation and model information. The assistant-facing product identity is Dev Orus 1.1.
 
-## Current release · 0.3.0
+## Current release · 0.4.0
 
-- Java + XML Android chat interface.
+- ChatGPT-style Java + XML chat interface: slide-in sidebar, centered start screen with suggestions, rounded message bubbles, pill-shaped composer, and copy-on-long-press for messages.
+- Settings screen with the Gemma model download, progress, cancel, and delete controls.
 - C++17 JNI bridge to the official LiteRT-LM C API.
 - Stateful local conversation using Gemma 4 E2B.
-- First-launch model download with progress display, storage check, retry, and model initialization.
+- Model download from **Settings** with progress display, storage check, cancel, retry, and delete. The chat screen shows a banner until the model is installed and loaded.
 - Model weights are stored in app-private storage and are not bundled into the APK.
 - After the one-time download, text generation runs on-device without a hosted AI API.
 - Existing tokenizer, experimental Transformer, and starter-corpus research code remain in the repository, but are not the active chat inference engine in this release.
@@ -31,12 +32,12 @@ This is an integration release, not a claim that the Gemma weights were independ
 ## First launch
 
 1. Install the arm64 APK.
-2. Tap **Download Gemma model** and confirm the approximately 2.6 GB download. Wi-Fi is recommended.
+2. Open the sidebar (☰) → **Settings**, tap **Download Gemma model**, and confirm the approximately 2.6 GB download. Wi-Fi is recommended.
 3. Keep at least 3.2 GB of free storage available during installation.
 4. Wait for the model to initialize. The chat becomes available when the status says the model is ready.
 5. After setup, you can disable internet access and continue chatting locally.
 
-If the download is interrupted, the incomplete temporary file is discarded and the download can be retried. If model initialization fails, use the retry button to load the installed model again.
+If the download is interrupted, the incomplete temporary file is discarded and the download can be retried from Settings. If model initialization fails, use the **Retry** button on the chat screen to load the installed model again.
 
 ## Model and runtime attribution
 
@@ -77,8 +78,8 @@ The SDK preparation script expects `curl`, `unzip`, and `sha256sum`. The APK bui
 
 ```text
 DevAI/
-├── app/src/main/java/com/devai/       # Java activity and model lifecycle
-├── app/src/main/res/layout/           # XML chat UI
+├── app/src/main/java/com/devai/       # Chat + Settings activities, ModelManager (download)
+├── app/src/main/res/                  # XML layouts, drawables, colors, styles
 ├── app/src/main/cpp/                  # JNI bridge, tokenizer, Transformer
 ├── scripts/prepare_litertlm_android.sh # Verified native runtime setup
 └── .github/workflows/                 # Android APK and native test workflows
