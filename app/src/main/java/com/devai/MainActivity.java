@@ -87,6 +87,8 @@ public final class MainActivity extends Activity {
             status.setText("MODEL NOT INSTALLED · First-time download required");
             modelButton.setText("Download Gemma model · about 2.6 GB");
             modelButton.setEnabled(true);
+            // Show the first-run download popup as soon as the app opens.
+            modelButton.post(this::confirmModelDownload);
         }
     }
 
