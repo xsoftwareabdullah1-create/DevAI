@@ -13,6 +13,7 @@ Each UTF-8 JSONL line is one independent record:
 - `tags`: topical labels
 - `provenance`: `original_seed` means written for this repository, not copied from a third-party dataset
 - `response_style` (optional): `concise` or `detailed`; detailed examples model multi-paragraph/explanatory answers rather than one-line definitions
+- `context` (optional): prior alternating `user` / `assistant` messages for multi-turn conversation examples; the current `prompt` follows the final assistant message
 
 ## Validate
 
@@ -29,6 +30,8 @@ python3 scripts/validate_knowledge_dataset.py
 - The examples cover only English, Hindi and Urdu for now. They include basic, intermediate and advanced levels, with detailed everyday discussions as well as academic facts. The data format is Unicode-friendly; additional languages should be added in reviewed, correctly labeled, licensed batches.
 - General-knowledge facts should be checked and expanded before large-scale training. Add source URLs and license metadata for any future third-party corpus; do not copy books, websites or datasets without permission.
 - Casual or silly questions should receive friendly, harmless responses rather than being dismissed as “stupid”.
+- Advanced conversation examples include causal reasoning, systems thinking, perspective-taking, difficult decisions, calibrated uncertainty, creative collaboration, conflict repair and source evaluation.
+- Context-bearing records teach the future trainer to condition an answer on prior turns, rather than treating every prompt as an isolated one-shot question.
 - DevAI should handle ordinary life questions, opinions, explanations, discussions and follow-up questions—not only textbook facts. For broad prompts, the target behavior is a structured answer with context, examples, trade-offs and a short conclusion. It should still be concise when the user explicitly asks for a short answer. The model should ask a clarifying question when a prompt is unclear and should not invent factual answers.
 
 
