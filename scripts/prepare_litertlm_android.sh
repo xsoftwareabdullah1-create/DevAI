@@ -43,5 +43,5 @@ done
 test -s "$SDK_DIR/include/c/engine.h"
 test -s "$SDK_DIR/include/c/conversation.h"
 test -s "$SDK_DIR/lib/arm64-v8a/libLiteRtLm.so"
-echo "LiteRT-LM Android arm64 SDK prepared."
+# Package the shared dependency where Android Gradle collects JNI libraries.\nJNI_LIB_DIR="$ROOT/app/src/main/jniLibs/arm64-v8a"\nmkdir -p "$JNI_LIB_DIR"\ninstall -m 0644 "$SDK_DIR/lib/arm64-v8a/libLiteRtLm.so" "$JNI_LIB_DIR/libLiteRtLm.so"\n\necho "LiteRT-LM Android arm64 SDK and APK JNI runtime prepared."
 du -h "$SDK_DIR/lib/arm64-v8a/libLiteRtLm.so"
