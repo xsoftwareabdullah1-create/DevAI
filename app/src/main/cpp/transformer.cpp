@@ -13,7 +13,8 @@ void rmsNorm(const float* x,const std::vector<float>& w,float* y,int d){
 }
 void matVec(const std::vector<float>& w,const float* x,float* y,int rows,int cols){
  for(int r=0;r<rows;++r){double sum=0;const std::size_t off=static_cast<std::size_t>(r)*cols;
-  for(int c=0;c<cols;++c)sum+=static_cast<double>(w[off+c])*x[c];y[r]=static_cast<float>(sum);}
+  for(int c=0;c<cols;++c) { sum+=static_cast<double>(w[off+c])*x[c]; }
+  y[r]=static_cast<float>(sum);}
 }
 float silu(float x){if(x>20.0f)return x;if(x< -20.0f)return 0.0f;return x/(1.0f+std::exp(-x));}
 void rope(float* x,int hd,int pos){
@@ -60,15 +61,18 @@ std::vector<float> TinyTransformer::forward(const std::vector<int>& ids)const{
   for(int t=0;t<seq;++t)for(int h=0;h<heads;++h){const float* query=q.data()+static_cast<std::size_t>(t)*d+h*hd;
    float maxScore=-std::numeric_limits<float>::infinity();
    for(int j=0;j<=t;++j){const float* key=k.data()+static_cast<std::size_t>(j)*d+h*hd;double dot=0;
-    for(int c=0;c<hd;++c)dot+=static_cast<double>(query[c])*key[c];scores[j]=static_cast<float>(dot)*scale;maxScore=std::max(maxScore,scores[j]);}
+    for(int c=0;c<hd;++c) { dot+=static_cast<double>(query[c])*key[c]; }
+    scores[j]=static_cast<float>(dot)*scale;maxScore=std::max(maxScore,scores[j]);}
    double denom=0;for(int j=0;j<=t;++j){scores[j]=std::exp(scores[j]-maxScore);denom+=scores[j];}
    float* out=attn.data()+static_cast<std::size_t>(t)*d+h*hd;
    for(int j=0;j<=t;++j){const float p=static_cast<float>(scores[j]/denom);const float* value=v.data()+static_cast<std::size_t>(j)*d+h*hd;
     for(int c=0;c<hd;++c)out[c]+=p*value[c];}}
   for(int t=0;t<seq;++t){const std::size_t o=static_cast<std::size_t>(t)*d;matVec(z.attentionOutput,attn.data()+o,proj.data()+o,d,d);
-   for(int c=0;c<d;++c)x[o+c]+=proj[o+c];rmsNorm(x.data()+o,z.feedForwardNorm,ffIn.data(),d);
+   for(int c=0;c<d;++c) { x[o+c]+=proj[o+c]; }
+   rmsNorm(x.data()+o,z.feedForwardNorm,ffIn.data(),d);
    matVec(z.gate,ffIn.data(),gate.data(),ff,d);matVec(z.up,ffIn.data(),up.data(),ff,d);
-   for(int c=0;c<ff;++c)gate[c]=silu(gate[c])*up[c];matVec(z.down,gate.data(),ffOut.data(),d,ff);
+   for(int c=0;c<ff;++c) { gate[c]=silu(gate[c])*up[c]; }
+   matVec(z.down,gate.data(),ffOut.data(),d,ff);
    for(int c=0;c<d;++c)x[o+c]+=ffOut[c];}
  }
  std::vector<float> logits(static_cast<std::size_t>(seq)*config_.vocabSize),finalState(d);
