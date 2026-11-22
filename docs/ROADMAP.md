@@ -38,9 +38,10 @@ This is a forward-pass reference implementation only. It does not learn from dat
 - [ ] Expand to additional languages in reviewed, correctly labeled batches
 - [ ] Expand beginner facts, then intermediate and advanced curriculum levels
 - [ ] Add dialogue-turn-aware training examples and evaluate context retention across held-out conversations
+- [ ] Build the 200,000-record conversation corpus in reviewed batches: 66,667 English, 66,667 Hindi and 66,666 Urdu
 - [ ] Add reviewed sources and license metadata for future third-party datasets
 
-The corpus now contains 198 original records (174 knowledge and conversation records from the earlier seed plus 24 advanced contextual dialogue records; 66 records per language). They do not change model weights until a training pipeline exists. Casual prompts should be handled politely and playfully when appropriate, not labeled as stupid; unclear prompts should invite clarification.
+The current corpus contains 198 original records (174 earlier records plus 24 advanced contextual dialogue records; 66 records per language). The separate 200,000-record conversation target is a planned expansion, not an existing dataset. See [CONVERSATION_CORPUS_PLAN.md](CONVERSATION_CORPUS_PLAN.md) for allocation and quality gates. They do not change model weights until a training pipeline exists. Casual prompts should be handled politely and playfully when appropriate, not labeled as stupid; unclear prompts should invite clarification.
 
 ## Milestone 5 — Training engine
 - [ ] Next-token cross-entropy loss
