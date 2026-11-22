@@ -1,68 +1,69 @@
 #include <jni.h>
-#include <iomanip>
+#include <mutex>
 #include <sstream>
 #include <string>
+#include <vector>
+#include "tokenizer.h"
 
-static std::string toHex(const std::string& input) {
-    std::ostringstream out;
-    out << std::hex << std::setfill('0');
-    for (unsigned char byte : input) {
-        out << std::setw(2) << static_cast<unsigned int>(byte);
-    }
-    return out.str();
-}
-
-static bool fromHex(const std::string& hex, std::string& output) {
-    if (hex.size() % 2 != 0) return false;
-
-    output.clear();
-    for (std::size_t i = 0; i < hex.size(); i += 2) {
-        unsigned int value = 0;
-        std::istringstream part(hex.substr(i, 2));
-        part >> std::hex >> value;
-        if (part.fail() || value > 255) return false;
-        output.push_back(static_cast<char>(value));
-    }
-    return true;
+namespace {
+ByteBpeTokenizer gTokenizer;
+std::mutex gMutex;
 }
 
 extern "C" JNIEXPORT jstring JNICALL
 Java_com_devai_MainActivity_nativeTokenizerInfo(JNIEnv* env, jobject) {
-    const std::string info =
-        "DevAI native core loaded.\n"
-        "Prototype: reversible byte encoding.\n"
-        "Byte values: 0..255 (256 possible IDs).\n"
-        "This is not BPE, a trained tokenizer, or a language model.";
-    return env->NewStringUTF(info.c_str());
+    std::lock_guard<std::mutex> lock(gMutex);
+    std::ostringstream out;
+    out << "DevAI byte-level BPE tokenizer\nStatus: "
+        << (gTokenizer.isTrained() ? "trained from supplied text" : "not trained")
+        << "\nVocabulary: " << gTokenizer.vocabularySize()
+        << " tokens\nBase IDs 0-255 are bytes; learned merges start at 256."
+        << "\nTokenizer only — no neural-network weights have been trained.";
+    return env->NewStringUTF(out.str().c_str());
 }
 
 extern "C" JNIEXPORT jstring JNICALL
-Java_com_devai_MainActivity_nativeEncodeAsHex(JNIEnv* env, jobject, jstring input) {
-    if (input == nullptr) return env->NewStringUTF("");
-
-    const char* chars = env->GetStringUTFChars(input, nullptr);
-    if (chars == nullptr) return env->NewStringUTF("");
-
-    const std::string bytes(chars);
-    env->ReleaseStringUTFChars(input, chars);
-
-    const std::string hex = toHex(bytes);
-    return env->NewStringUTF(hex.c_str());
+Java_com_devai_MainActivity_nativeTrainTokenizer(JNIEnv* env, jobject, jstring corpus, jint mergeCount) {
+    if (!corpus) return env->NewStringUTF("Training text is empty.");
+    const char* chars = env->GetStringUTFChars(corpus, nullptr);
+    if (!chars) return env->NewStringUTF("Could not read training text.");
+    std::string text(chars);
+    env->ReleaseStringUTFChars(corpus, chars);
+    std::lock_guard<std::mutex> lock(gMutex);
+    if (!gTokenizer.train(text, static_cast<int>(mergeCount)))
+        return env->NewStringUTF("Training failed. Enter non-empty text.");
+    std::ostringstream out;
+    out << "Tokenizer training complete.\nVocabulary: " << gTokenizer.vocabularySize()
+        << "\nLearned merges: " << gTokenizer.vocabularySize() - 256
+        << "\nThis does not train neural-network weights.";
+    return env->NewStringUTF(out.str().c_str());
 }
 
-extern "C" JNIEXPORT jstring JNICALL
-Java_com_devai_MainActivity_nativeDecodeHex(JNIEnv* env, jobject, jstring input) {
-    if (input == nullptr) return env->NewStringUTF("");
-
+extern "C" JNIEXPORT jintArray JNICALL
+Java_com_devai_MainActivity_nativeEncode(JNIEnv* env, jobject, jstring input) {
+    if (!input) return env->NewIntArray(0);
     const char* chars = env->GetStringUTFChars(input, nullptr);
-    if (chars == nullptr) return env->NewStringUTF("");
-
-    const std::string hex(chars);
+    if (!chars) return env->NewIntArray(0);
+    std::string text(chars);
     env->ReleaseStringUTFChars(input, chars);
-
-    std::string decoded;
-    if (!fromHex(hex, decoded)) {
-        return env->NewStringUTF("Invalid hexadecimal input.");
+    std::lock_guard<std::mutex> lock(gMutex);
+    const std::vector<int> ids = gTokenizer.encode(text);
+    jintArray result = env->NewIntArray(static_cast<jsize>(ids.size()));
+    if (result && !ids.empty()) {
+        std::vector<jint> values(ids.begin(), ids.end());
+        env->SetIntArrayRegion(result, 0, static_cast<jsize>(values.size()), values.data());
     }
+    return result;
+}
+
+extern "C" JNIEXPORT jstring JNICALL
+Java_com_devai_MainActivity_nativeDecode(JNIEnv* env, jobject, jintArray input) {
+    if (!input) return env->NewStringUTF("");
+    const jsize length = env->GetArrayLength(input);
+    std::vector<jint> values(static_cast<std::size_t>(length));
+    if (length > 0) env->GetIntArrayRegion(input, 0, length, values.data());
+    std::vector<int> ids(values.begin(), values.end());
+    std::lock_guard<std::mutex> lock(gMutex);
+    const std::string decoded = gTokenizer.decode(ids);
     return env->NewStringUTF(decoded.c_str());
 }
