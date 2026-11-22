@@ -43,6 +43,15 @@
             android:text="Download Gemma model · about 2.6 GB" />
     </LinearLayout>
 
+    <Button
+        android:id="@+id/crashReportButton"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="20dp"
+        android:layout_marginEnd="20dp"
+        android:text="View / Share Crash Report"
+        android:visibility="gone" />
+
     <View
         android:layout_width="match_parent"
         android:layout_height="1dp"
