@@ -28,6 +28,8 @@ This is a forward-pass reference implementation only. It does not learn from dat
 - [x] Add friendly casual conversation examples: greetings, thanks, jokes, riddles, boredom and playful nonsense
 - [x] Add detailed everyday-life and discussion examples: communication, disagreements, digital footprint, misinformation, AI limitations, habits, money basics and complex questions
 - [x] Add response-style metadata for detailed answers
+- [x] Add 24 advanced multi-turn dialogue records across English, Hindi and Urdu, with explicit prior-turn context
+- [x] Cover causal reasoning, systems thinking, perspective-taking, decision-making, uncertainty, creative collaboration, conflict repair and source evaluation
 - [x] Define UTF-8 JSONL record format with IDs, language, level, tags and provenance
 - [x] Add a Python standard-library dataset validator
 - [x] Add deterministic train/validation split preparation with concept-group isolation
@@ -35,9 +37,10 @@ This is a forward-pass reference implementation only. It does not learn from dat
 - [x] Run dataset validation in native CI
 - [ ] Expand to additional languages in reviewed, correctly labeled batches
 - [ ] Expand beginner facts, then intermediate and advanced curriculum levels
+- [ ] Add dialogue-turn-aware training examples and evaluate context retention across held-out conversations
 - [ ] Add reviewed sources and license metadata for future third-party datasets
 
-The 150 records are starter examples only (126 knowledge and 24 conversation records; 50 records per language), including a small intermediate-level seed. They do not change model weights until a training pipeline exists. Casual prompts should be handled politely and playfully when appropriate, not labeled as stupid; unclear prompts should invite clarification.
+The corpus now contains 198 original records (174 knowledge and conversation records from the earlier seed plus 24 advanced contextual dialogue records; 66 records per language). They do not change model weights until a training pipeline exists. Casual prompts should be handled politely and playfully when appropriate, not labeled as stupid; unclear prompts should invite clarification.
 
 ## Milestone 5 — Training engine
 - [ ] Next-token cross-entropy loss
