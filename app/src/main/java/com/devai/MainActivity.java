@@ -1,6 +1,8 @@
 package com.devai;
 
 import android.app.Activity;
+import android.graphics.Typeface;
+import android.graphics.drawable.GradientDrawable;
 import android.app.AlertDialog;
 import android.content.Intent;
 import android.os.Bundle;
@@ -56,6 +58,11 @@ public final class MainActivity extends Activity {
         status = findViewById(R.id.status);
         sendButton = findViewById(R.id.sendButton);
         modelButton = findViewById(R.id.modelButton);
+        Button newChatButton = findViewById(R.id.newChatButton);
+        newChatButton.setOnClickListener(v -> {
+            messages.removeAllViews();
+            addMessage("Dev Orus 1.1", "New chat started. How can I help you?", false);
+        });
         Button diagnosticsButton = findViewById(R.id.crashReportButton);
         diagnosticsButton.setOnClickListener(v -> CrashDiagnostics.show(this));
         if (CrashDiagnostics.hasReport(this)) diagnosticsButton.setVisibility(android.view.View.VISIBLE);
@@ -303,20 +310,38 @@ public final class MainActivity extends Activity {
     }
 
     private void addMessage(String sender, String body, boolean user) {
-        TextView bubble = new TextView(this);
-        bubble.setText(sender + "\n" + body);
-        bubble.setTextColor(0xFF172238);
-        bubble.setTextSize(15);
-        bubble.setLineSpacing(3f, 1.0f);
-        bubble.setPadding(16, 12, 16, 12);
-        bubble.setBackgroundColor(user ? 0xFFD9F3EC : 0xFFF0F4FA);
+        LinearLayout message = new LinearLayout(this);
+        message.setOrientation(LinearLayout.VERTICAL);
+        message.setPadding(user ? 15 : 2, 4, user ? 15 : 2, 4);
+
+        TextView author = new TextView(this);
+        author.setText(user ? "You" : "Dev Orus");
+        author.setTextColor(user ? 0xFF626B7A : 0xFF202A44);
+        author.setTextSize(12);
+        author.setTypeface(Typeface.DEFAULT, Typeface.BOLD);
+        author.setPadding(2, 0, 2, 6);
+        message.addView(author);
+
+        TextView content = new TextView(this);
+        content.setText(body);
+        content.setTextColor(0xFF252936);
+        content.setTextSize(15);
+        content.setLineSpacing(4f, 1.0f);
+        content.setPadding(user ? 14 : 2, user ? 11 : 2, user ? 14 : 2, user ? 11 : 2);
+        if (user) {
+            GradientDrawable bubble = new GradientDrawable();
+            bubble.setColor(0xFFF0F1F4);
+            bubble.setCornerRadius(22f);
+            content.setBackground(bubble);
+        }
+        message.addView(content);
+
         LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
-                user ? (int)(getResources().getDisplayMetrics().widthPixels * 0.82f)
-                        : (int)(getResources().getDisplayMetrics().widthPixels * 0.90f),
+                user ? LinearLayout.LayoutParams.WRAP_CONTENT : LinearLayout.LayoutParams.MATCH_PARENT,
                 LinearLayout.LayoutParams.WRAP_CONTENT);
         params.gravity = user ? Gravity.END : Gravity.START;
-        params.setMargins(0, 6, 0, 6);
-        messages.addView(bubble, params);
+        params.setMargins(0, 7, 0, 15);
+        messages.addView(message, params);
         chatScroll.post(() -> chatScroll.fullScroll(ScrollView.FOCUS_DOWN));
     }
 
