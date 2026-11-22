@@ -20,6 +20,10 @@ DevAI is an independently implemented language-model research project. It uses n
 - Deterministic train/validation split preparation that keeps translated variants of the same concept together.
 - No INTERNET permission, external inference API, or pretrained weights.
 
+## All-round answer quality
+
+DevAI's target response behavior and evaluation rubric are documented in [the response quality standard](docs/RESPONSE_QUALITY_STANDARD.md). It covers casual chat, general knowledge, education, science, coding, everyday decisions, creative work, reasoning, multilingual conversation, context handling, uncertainty and factual reliability. These are target requirements—not learned capabilities yet.
+
 ## Starter knowledge and casual conversation data
 
 See [data/knowledge/README.md](data/knowledge/README.md), [seed_knowledge.jsonl](data/knowledge/seed_knowledge.jsonl), and the [200,000-record conversation corpus plan](docs/CONVERSATION_CORPUS_PLAN.md).
