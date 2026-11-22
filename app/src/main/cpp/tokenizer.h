@@ -11,6 +11,11 @@ public:
     std::string decode(const std::vector<int>& ids) const;
     int vocabularySize() const;
     bool isTrained() const { return trained_; }
+
+    // Versioned binary vocabulary format. Returns false on I/O or validation errors.
+    bool save(const std::string& path) const;
+    bool load(const std::string& path);
+
 private:
     std::vector<std::pair<std::string, std::string>> merges_;
     std::vector<std::string> vocabulary_;
