@@ -1,0 +1,138 @@
+{
+  "name": "Dev Orus 1.1 Programming Curriculum",
+  "version": "1.0.0",
+  "status": "curriculum_and_retrieval_examples_added_not_neural_training",
+  "policy": {
+    "models": "No pretrained or external AI models, weights, hosted inference, or teacher distillation.",
+    "training_claim": "Adding curriculum records or building a retrieval index does not update neural-network weights. A neural training engine, optimizer, checkpointing, and evaluation are separate required milestones."
+  },
+  "sequence": [
+    {
+      "language": "Python",
+      "level": "beginner_to_advanced",
+      "topics": [
+        "installation and interpreter",
+        "syntax and indentation",
+        "variables and naming",
+        "built-in types",
+        "operators and expressions",
+        "strings and formatting",
+        "lists tuples dictionaries sets",
+        "conditions",
+        "for and while loops",
+        "functions and scope",
+        "parameters and return values",
+        "modules and packages",
+        "exceptions",
+        "file handling and context managers",
+        "comprehensions",
+        "iterators and generators",
+        "classes and objects",
+        "inheritance and composition",
+        "dataclasses and properties",
+        "decorators",
+        "type hints",
+        "standard library",
+        "virtual environments and packaging",
+        "unit testing and debugging",
+        "logging",
+        "regular expressions",
+        "JSON and CSV",
+        "networking concepts",
+        "databases and SQL basics",
+        "asyncio and concurrency",
+        "profiling and performance",
+        "security and robust input validation",
+        "capstone projects"
+      ]
+    },
+    {
+      "language": "C",
+      "level": "beginner_to_advanced",
+      "topics": [
+        "compiler and build process",
+        "source files and headers",
+        "types and declarations",
+        "operators and expressions",
+        "control flow",
+        "functions and prototypes",
+        "arrays",
+        "strings and null terminators",
+        "pointers and pointer arithmetic",
+        "const and qualifiers",
+        "struct enum and union",
+        "scope and storage duration",
+        "stack and static storage",
+        "dynamic allocation",
+        "malloc calloc realloc free",
+        "function pointers",
+        "preprocessor and macros",
+        "multi-file programs and linking",
+        "file I/O",
+        "error handling",
+        "bitwise operations",
+        "integer conversions and overflow",
+        "undefined behavior",
+        "data structures",
+        "debuggers and sanitizers",
+        "portability and C standards",
+        "testing and build automation",
+        "capstone projects"
+      ]
+    },
+    {
+      "language": "C++",
+      "level": "beginner_to_advanced",
+      "topics": [
+        "compilation and C++17/20 setup",
+        "types and expressions",
+        "references and pointers",
+        "functions and overloads",
+        "classes and encapsulation",
+        "constructors and destructors",
+        "const correctness",
+        "RAII",
+        "copy and move semantics",
+        "smart pointers",
+        "standard library strings and containers",
+        "iterators and algorithms",
+        "templates",
+        "lambdas",
+        "exceptions and error handling",
+        "optional and variant",
+        "filesystem",
+        "CMake",
+        "unit testing",
+        "concurrency and synchronization",
+        "atomics fundamentals",
+        "performance profiling",
+        "memory model fundamentals",
+        "modern C++20 concepts and ranges",
+        "JNI interoperability concepts",
+        "capstone projects"
+      ]
+    },
+    {
+      "integration_projects": [
+        "Python command-line study helper",
+        "C text and CSV parser with tests",
+        "C++ standard-library data manager",
+        "same algorithm implemented in all three languages",
+        "C++ shared library called from Java through JNI",
+        "Android Java/XML app using a C++17 native module"
+      ]
+    }
+  ],
+  "evaluation": {
+    "per_topic": [
+      "concept explanation",
+      "worked example",
+      "predict-the-output exercise",
+      "write-code exercise",
+      "debugging exercise",
+      "boundary-case tests",
+      "unseen transfer problem"
+    ],
+    "completion_rule": "Do not mark a topic mastered until unseen exercises and tests pass. Keep training-data coverage separate from model-weight training metrics."
+  }
+}
