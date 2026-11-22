@@ -24,7 +24,7 @@
 This is a forward-pass reference implementation only. It does not learn from data, persist weights, or generate meaningful chat.
 
 ## Milestone 4 — Beginner knowledge and conversation seed corpus
-- [x] Add original beginner general-knowledge Q&A in English, Hindi and Urdu (81 knowledge records)
+- [x] Add original general-knowledge Q&A in English, Hindi and Urdu (126 knowledge records)
 - [x] Add friendly casual conversation examples: greetings, thanks, jokes, riddles, boredom and playful nonsense (24 conversation records)
 - [x] Define UTF-8 JSONL record format with IDs, language, level, tags and provenance
 - [x] Add a Python standard-library dataset validator
@@ -33,7 +33,7 @@ This is a forward-pass reference implementation only. It does not learn from dat
 - [ ] Expand beginner facts, then intermediate and advanced curriculum levels
 - [ ] Add reviewed sources and license metadata for future third-party datasets
 
-The 105 records are starter examples only (81 knowledge and 24 conversation records; 35 records per language). They do not change model weights until a training pipeline exists. Casual prompts should be handled politely and playfully when appropriate, not labeled as stupid; unclear prompts should invite clarification.
+The 150 records are starter examples only (126 knowledge and 24 conversation records; 50 records per language), including a small intermediate-level seed. They do not change model weights until a training pipeline exists. Casual prompts should be handled politely and playfully when appropriate, not labeled as stupid; unclear prompts should invite clarification.
 
 ## Milestone 5 — Training engine
 - [ ] Next-token cross-entropy loss
