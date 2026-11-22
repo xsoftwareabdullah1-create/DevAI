@@ -338,9 +338,9 @@ Java_com_devai_MainActivity_nativeInitGemma(JNIEnv* env, jobject, jstring modelP
             conversationConfig, sessionConfig);
     }
     const char* systemMessage =
-        "{\\"role\\":\\"system\\",\\"content\\":\\"You are Dev Orus 1.1, a helpful, "
+        "{\"role\":\"system\",\"content\":\"You are Dev Orus 1.1, a helpful, "
         "honest, clear and respectful offline assistant. Answer in the language used by "
-        "the user. Do not claim access to the internet. If unsure, say so.\\"}";
+        "the user. Do not claim access to the internet. If unsure, say so.\"}";
     if (status == kLiteRtLmStatusOk) {
         status = litert_lm_conversation_config_set_system_message(
             conversationConfig, systemMessage);
@@ -372,7 +372,7 @@ Java_com_devai_MainActivity_nativeGenerate(JNIEnv* env, jobject, jstring prompt)
     std::lock_guard<std::mutex> lock(gGemmaMutex);
     if (!gGemmaConversation) return env->NewStringUTF("Gemma model is not loaded.");
     const std::string message =
-        "{\\"role\\":\\"user\\",\\"content\\":\\"" + jsonEscape(text) + "\\"}";
+        "{\"role\":\"user\",\"content\":\"" + jsonEscape(text) + "\"}";
     LiteRtLmJsonResponse* response = nullptr;
     const LiteRtLmStatusCode status = litert_lm_conversation_send_message(
         gGemmaConversation, message.c_str(), nullptr, nullptr, &response);
@@ -384,7 +384,7 @@ Java_com_devai_MainActivity_nativeGenerate(JNIEnv* env, jobject, jstring prompt)
     const LiteRtLmStatusCode readStatus =
         litert_lm_json_response_get_string(response, &responseJson);
     std::string result = readStatus == kLiteRtLmStatusOk && responseJson
-        ? responseJson : "{\\"error\\":\\"The model returned an empty response.\\"}";
+        ? responseJson : "{\"error\":\"The model returned an empty response.\"}";
     litert_lm_json_response_delete(response);
     return env->NewStringUTF(result.c_str());
 }
