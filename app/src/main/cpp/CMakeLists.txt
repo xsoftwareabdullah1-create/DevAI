@@ -9,10 +9,13 @@ if(NOT EXISTS "${LITERTLM_INCLUDE}/c/engine.h" OR NOT EXISTS "${LITERTLM_LIBRARY
     message(FATAL_ERROR "LiteRT-LM SDK is missing. Run scripts/prepare_litertlm_android.sh before building.")
 endif()
 
+# The upstream Android .so has no DT_SONAME. Tell CMake to link it by its
+# library name rather than embedding the CI machine's absolute file path in
+# libdevai.so's DT_NEEDED entry. The runtime copy is packaged from jniLibs.
 add_library(litertlm SHARED IMPORTED GLOBAL)
 set_target_properties(litertlm PROPERTIES
     IMPORTED_LOCATION "${LITERTLM_LIBRARY}"
-    IMPORTED_SONAME "libLiteRtLm.so"
+    IMPORTED_NO_SONAME TRUE
 )
 
 add_library(devai SHARED
