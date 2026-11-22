@@ -20,6 +20,8 @@ DevAI is an independently implemented language-model research project. It uses n
 - Deterministic train/validation split preparation that keeps translated variants of the same concept together.
 - No INTERNET permission, external inference API, or pretrained weights.
 
+DevAI's long-term goal is open-domain conversation: understanding questions, informal messages, follow-ups, corrections, mixed-language text and unfamiliar topics—not only matching a fixed FAQ list. See the [open-domain understanding requirements](docs/RESPONSE_QUALITY_STANDARD.md#open-domain-understanding-the-intended-scope). This is a target, not a capability of the current untrained prototype.
+
 ## All-round answer quality
 
 DevAI's target response behavior and evaluation rubric are documented in [the response quality standard](docs/RESPONSE_QUALITY_STANDARD.md). It covers casual chat, general knowledge, education, science, coding, everyday decisions, creative work, reasoning, multilingual conversation, context handling, uncertainty and factual reliability. These are target requirements—not learned capabilities yet.
