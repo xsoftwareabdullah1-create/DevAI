@@ -16,12 +16,14 @@ This roadmap distinguishes tokenizer experiments from actual learned language-mo
 - [x] Learn deterministic frequent-pair merges
 - [x] Encode text using learned merges
 - [x] Decode token IDs back to bytes
+- [x] Add initial host-side round-trip and determinism tests
 - [ ] Persist vocabulary and merge ranks to a versioned file
-- [ ] Add repeatable fixtures and native unit tests
 - [ ] Test malformed input and supplementary Unicode characters
 - [ ] Move training off the UI thread and add input-size limits
 
 The current implementation is educational and uses JNI modified UTF-8 strings. It is not yet a production tokenizer.
+
+Run host tests with: `sh tests/run_tokenizer_tests.sh` (requires a C++17 compiler).
 
 ## Milestone 3 — Transformer forward pass
 
