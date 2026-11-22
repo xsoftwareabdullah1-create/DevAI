@@ -22,3 +22,5 @@ jobs:
         run: python3 scripts/validate_knowledge_dataset.py
       - name: Test deterministic dataset preparation
         run: PYTHONPATH=scripts python3 -m unittest discover -s tests -p 'test_prepare_dataset.py'
+      - name: Prepare actual curriculum train and validation splits
+        run: python3 scripts/prepare_dataset.py --seed 2026
