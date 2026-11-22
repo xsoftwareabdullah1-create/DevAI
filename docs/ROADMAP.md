@@ -1,68 +1,46 @@
 # DevAI technical roadmap
 
-This roadmap distinguishes tokenizer experiments from actual learned language-model capability.
-
 ## Milestone 1 — Android/JNI foundation
-
-- [x] Java activity and XML layout
-- [x] CMake C++ shared library
-- [x] JNI bridge
-- [x] Reversible byte encoding prototype
+- [x] Java activity and XML UI
+- [x] CMake C++ shared library and JNI
 
 ## Milestone 2 — Experimental byte-level BPE tokenizer
+- [x] Learn deterministic byte-pair merges from supplied text
+- [x] Encode and decode token IDs
+- [x] Initial host-side round-trip tests
+- [ ] Persist vocabulary and merge ranks
+- [ ] Harden Unicode handling and run tokenizer work off the UI thread
 
-- [x] Start from individual byte symbols (IDs 0–255)
-- [x] Count adjacent symbol pairs in user-supplied corpus
-- [x] Learn deterministic frequent-pair merges
-- [x] Encode text using learned merges
-- [x] Decode token IDs back to bytes
-- [x] Add initial host-side round-trip and determinism tests
-- [x] Save/load merges using a versioned binary vocabulary format
-- [x] Test persistence round trips and reject malformed model files
-- [ ] Test supplementary Unicode characters end-to-end through JNI
-- [ ] Integrate vocabulary save/load into Android app-private storage
-- [ ] Move training off the UI thread and add input-size limits
+## Milestone 3 — Tiny decoder-only Transformer forward pass
+- [x] Randomly initialized token embeddings and linear weights
+- [x] RMSNorm
+- [x] Causal multi-head self-attention with stable softmax
+- [x] RoPE positional rotation
+- [x] SwiGLU feed-forward block
+- [x] Residual connections and vocabulary logits
+- [x] JNI entry point and Android demo button
+- [x] Native tests for finite outputs, causal prefix invariance, deterministic seeds and input bounds
 
-The current implementation is educational and uses JNI modified UTF-8 strings. It is not yet a production tokenizer.
-
-Run host tests with: `sh tests/run_tokenizer_tests.sh` (requires a C++17 compiler).
-
-## Milestone 3 — Transformer forward pass
-
-Start with tiny deterministic tensors suitable for numerical testing:
-
-- decoder-only causal Transformer
-- token embeddings
-- causal self-attention
-- RoPE positional encoding
-- RMSNorm
-- SwiGLU feed-forward layers
-- language-model output projection
-
-Compare intermediate values against independently calculated reference results.
+This is a forward-pass reference implementation only. It does not learn from data, persist weights, or generate meaningful chat.
 
 ## Milestone 4 — Training engine
+- [ ] Next-token cross-entropy loss
+- [ ] Backpropagation and gradient checks
+- [ ] AdamW and gradient clipping
+- [ ] Mini-batch training and validation loop
+- [ ] Checkpoint save/load and resume
 
-Implement and test:
+## Milestone 5 — Dataset and evaluation
+- [ ] Add licensed local dataset import and provenance records
+- [ ] Deterministic train/validation split
+- [ ] Report held-out loss and sample-generation quality
 
-- next-token cross-entropy loss
-- gradient computation / backpropagation
-- AdamW optimizer
-- gradient clipping
-- deterministic random initialization
-- checkpoint save/load
-- training and validation metrics
-
-Do not call a model trained until weights have actually been updated and validation is measured.
-
-## Milestone 5 — Data
-
-Use only datasets whose licenses and terms permit the intended use. Record source, license, retrieval date, preprocessing, and split metadata. Keep validation examples out of training.
-
-## Milestone 6 — Android inference and chat
-
-Add autoregressive generation only after the forward pass is correct. Keep inference local and network-independent. Add cancellation, bounded context, and memory-aware execution.
+## Milestone 6 — Local chat and Android optimization
+- [ ] Autoregressive sampling after model training
+- [ ] Persist model checkpoints and tokenizer assets
+- [ ] Profile arm64 CPU, memory, battery and thermals
+- [ ] Optimize with NEON, quantization and bounded context where justified
 
 ## Scaling policy
 
-A 100M-parameter model is a long-term architecture target, not a realistic first on-device training run. Measure peak RAM, sustained speed, battery impact, and thermal throttling at each scale. Checkpoint and stop safely under memory or thermal pressure.
+Keep the initial model tiny. A 100M-parameter target is a long-term research goal, not an assumed phone capability. Increase dimensions only after measuring peak RAM, throughput and thermal behavior on target hardware.
