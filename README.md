@@ -4,7 +4,7 @@
 
 DevAI is an independently implemented language-model research project. It uses no pretrained model weights and no external AI inference APIs. The current code includes an experimental tokenizer, a small C++ decoder-only Transformer forward pass, and an original multilingual starter corpus.
 
-> **Current status: forward-pass prototype + starter dataset.** The app can train a byte-level BPE tokenizer from supplied text, encode/decode IDs, and run a tiny randomly initialized Transformer. A 60-record beginner corpus is now included for future training-pipeline work. The model has **not** learned this corpus yet and does not produce meaningful chat.
+> **Current status: forward-pass prototype + starter dataset.** The app can train a byte-level BPE tokenizer from supplied text, encode/decode IDs, and run a tiny randomly initialized Transformer. A 105-record beginner corpus is now included for future training-pipeline work. The model has **not** learned this corpus yet and does not produce meaningful chat.
 
 ## Implemented
 
@@ -13,7 +13,7 @@ DevAI is an independently implemented language-model research project. It uses n
 - Decoder-only Transformer forward pass with token embeddings, RMSNorm, causal multi-head self-attention, RoPE, SwiGLU feed-forward layers, residual connections and vocabulary logits.
 - Deterministic random initialization from a configurable seed.
 - Input validation and a 2,000,000-parameter allocation guard.
-- Original 60-record starter corpus: beginner general knowledge and casual conversation in English, Hindi and Urdu.
+- Original 105-record starter corpus: beginner general knowledge and casual conversation in English, Hindi and Urdu.
 - Python standard-library validator for the JSONL corpus.
 - No INTERNET permission, external inference API, or pretrained weights.
 
@@ -29,7 +29,7 @@ Validate the dataset:
 python3 scripts/validate_knowledge_dataset.py
 ```
 
-The starter corpus currently covers English, Hindi and Urdu only. It is a small original seed set, not a comprehensive general-knowledge library. More languages and carefully reviewed, properly licensed data need to be added gradually.
+The starter corpus currently covers English, Hindi and Urdu only, with 35 concepts represented in each language. It includes beginner science, geography, mathematics, biology, environment, technology, civics and history. It is a small original seed set, not a comprehensive general-knowledge library. More languages and carefully reviewed, properly licensed data need to be added gradually.
 
 ## Tiny Android configuration
 
