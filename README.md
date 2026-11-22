@@ -1,278 +1,100 @@
 <p align="center">
-  <img src="https://raw.githubusercontent.com/xsoftwareabdullah1-create/DevAI/main/assets/branding/devai-logo.svg" alt="DevAI minimalist monogram logo" width="150" />
-</p>
-
-<p align="center">
-  <strong>DevAI</strong><br/>
-  <em>Independent offline AI research for Android</em>
+  <img src="https://raw.githubusercontent.com/xsoftwareabdullah1-create/DevAI/main/assets/branding/devai-logo.svg" alt="DevAI logo" width="150" />
 </p>
 
 <h1 align="center">DevAI · Dev Orus 1.1</h1>
-
-<p align="center">
-  <strong>Build an original language model. Run it locally. Keep control of the data and weights.</strong>
-</p>
+<p align="center"><strong>Private, on-device AI chat for Android.</strong></p>
 
 <p align="center">
   <img alt="Platform" src="https://img.shields.io/badge/Platform-Android-3DDC84?logo=android&logoColor=white" />
-  <img alt="Languages" src="https://img.shields.io/badge/Core-C%2B%2B17-00599C?logo=cplusplus&logoColor=white" />
   <img alt="UI" src="https://img.shields.io/badge/UI-Java%20%2B%20XML-orange" />
-  <img alt="Mode" src="https://img.shields.io/badge/Mode-Offline%20first-276EF1" />
-  <img alt="Model" src="https://img.shields.io/badge/Model-Dev%20Orus%201.1-7655C5" />
+  <img alt="Native" src="https://img.shields.io/badge/Native-C%2B%2B17-00599C?logo=cplusplus" />
+  <img alt="Inference" src="https://img.shields.io/badge/Inference-Offline%20after%20download-276EF1" />
 </p>
 
----
+## What is Dev Orus 1.1?
 
-## 1. Project overview
+DevAI is the Android application and **Dev Orus 1.1** is the assistant identity shown in the chat experience. This release uses the complete **Google Gemma 4 E2B instruction-tuned model** for language generation, executed locally with Google's LiteRT-LM runtime.
 
-**DevAI** is an independent attempt to develop an original, offline-first conversational AI for Android. Its model identity is **Dev Orus 1.1**.
+This is an integration release, not a claim that the Gemma weights were independently trained by this repository. The underlying model remains Gemma 4 E2B and is attributed to Google in this documentation and model information. The assistant-facing product identity is Dev Orus 1.1.
 
-The project is intended to own its complete model pipeline: tokenizer, architecture, training code, datasets, learned checkpoints, and on-device inference. The application is designed around a native Android interface written in **Java and XML**, with performance-sensitive model code written in **C++17 and exposed through JNI**.
+## Current release · 0.3.0
 
-### Independence commitment
+- Java + XML Android chat interface.
+- C++17 JNI bridge to the official LiteRT-LM C API.
+- Stateful local conversation using Gemma 4 E2B.
+- First-launch model download with progress display, storage check, retry, and model initialization.
+- Model weights are stored in app-private storage and are not bundled into the APK.
+- After the one-time download, text generation runs on-device without a hosted AI API.
+- Existing tokenizer, experimental Transformer, and starter-corpus research code remain in the repository, but are not the active chat inference engine in this release.
 
-DevAI is not intended to be a wrapper around another AI product.
+## First launch
 
-- No pretrained third-party model weights.
-- No Qwen, Llama, Gemma, Phi, Mistral, or other external model integration.
-- No hosted AI inference API or cloud chatbot dependency.
-- No teacher-model distillation or imported model checkpoints.
-- Original model parameters must begin from documented random initialization.
-- Training data must have recorded provenance and appropriate permission.
+1. Install the arm64 APK.
+2. Tap **Download Gemma model** and confirm the approximately 2.6 GB download. Wi-Fi is recommended.
+3. Keep at least 3.2 GB of free storage available during installation.
+4. Wait for the model to initialize. The chat becomes available when the status says the model is ready.
+5. After setup, you can disable internet access and continue chatting locally.
 
-The project may use ordinary development libraries and build tools, but those must not supply an external AI model or hosted AI inference.
+If the download is interrupted, the incomplete temporary file is discarded and the download can be retried. If model initialization fails, use the retry button to load the installed model again.
 
-## 2. Current development status
+## Model and runtime attribution
 
-<blockquote>
-  <strong>Early offline chat prototype — limited retrieval, not a generative language model.</strong><br/>
-  The Android app now has a chat-first interface and trains a local character n-gram TF-IDF retrieval index from the bundled 210-record multilingual starter corpus at launch. It selects the closest stored response. Transformer backpropagation, an optimizer, learned neural checkpoints, and autoregressive generation are still pending.
-</blockquote>
-
-| Component | Current status |
+| Item | Details |
 |---|---|
-| Android Java/XML foundation | Present |
-| C++17 JNI integration | Present |
-| Byte-level BPE tokenizer | Experimental implementation |
-| Transformer forward pass | Implemented |
-| Random parameter initialization | Implemented |
-| Backpropagation | Not implemented |
-| AdamW optimizer | Not implemented |
-| Full model training loop | Not implemented |
-| Persistent learned checkpoints | Not implemented |
-| Autoregressive chat generation | Not implemented |
-| Chat-first interface | Implemented (early prototype) |
-| Offline corpus retrieval | Implemented (TF-IDF character n-grams) |
-| Offline retrieval chat | Early prototype; limited to corpus matches |
-| Generative conversational AI | Future milestone |
+| Assistant identity | Dev Orus 1.1 |
+| Underlying model | Google Gemma 4 E2B IT |
+| Model format | LiteRT-LM `.litertlm` |
+| Model package | About 2.59 GB |
+| Inference runtime | Google LiteRT-LM C API 1.0.0 |
+| Runtime release | LiteRT-LM v0.19.1 |
+| Native integration | C++17 through JNI |
+| Android UI | Java + XML |
+| ABI | arm64-v8a |
+| Minimum Android | API 27 (Android 8.1) |
+| Inference backend | CPU |
 
-The chat currently uses a small corpus-trained retrieval index, not the random Transformer. It can return a stored response when a prompt is sufficiently similar to one of the 210 examples. It does not synthesize novel answers, reliably handle unseen topics, or maintain semantic multi-turn context. The Transformer remains an experimental forward-pass component and has no training loop.
+Model source: https://huggingface.co/litert-community/gemma-4-E2B-it-litert-lm
 
-## 3. Model identity and baseline architecture
+Runtime source and releases: https://github.com/google-ai-edge/LiteRT-LM
 
-**Model family:** Dev Orus  
-**Version label:** 1.1  
-**Project:** DevAI
+The model repository identifies the LiteRT Community Gemma 4 E2B IT package as Apache-2.0. Review the model repository's current license and the Google model terms before redistribution or commercial use. LiteRT-LM is distributed under its own Apache-2.0 license.
 
-The first correctness-oriented architecture baseline is intentionally small:
+## Build from source
 
-| Setting | Initial value |
-|---|---:|
-| Vocabulary size | 512 |
-| Hidden dimension | 32 |
-| Attention heads | 4 |
-| Transformer layers | 1 |
-| Feed-forward dimension | 64 |
-| Context length | 64 tokens |
-| Objective (planned) | Causal next-token prediction |
-| Optimizer (planned) | AdamW |
+The project uses Android Gradle Plugin 8.6.1, Gradle 8.7, Java 17, Android SDK 35, CMake 3.22.1, and NDK 27.2.12479018 in CI.
 
-This configuration is for validating implementation and training mathematics. It is not expected to deliver broad language ability. Model size, context length, and training scale should only increase after memory, speed, and quality are measured.
-
-## 4. Technical architecture
-
-```text
-┌──────────────────────────────────────┐
-│          Android application         │
-│        Java + XML user interface     │
-│                                      │
-│  Chat  ·  Conversation history       │
-│  Model status  ·  Developer Lab      │
-└──────────────────┬───────────────────┘
-                   │ JNI
-┌──────────────────▼───────────────────┐
-│           Native C++17 core          │
-│                                      │
-│  Tokenizer · Transformer · Training  │
-│  Checkpoints · Text generation       │
-└──────────────────┬───────────────────┘
-                   │
-┌──────────────────▼───────────────────┐
-│       Dev Orus 1.1 model files       │
-│  Original weights · Vocabulary       │
-│  Training metadata · Local storage   │
-└──────────────────────────────────────┘
-```
-
-The diagram describes the intended architecture, not a claim that every box is implemented. The current native core does not yet include training or generation.
-
-### Android layer
-
-- Java Activity and XML layouts.
-- Native library loaded through JNI.
-- Planned chat history and local model/checkpoint management.
-- Long-running native work must execute away from the UI thread.
-- Training and diagnostics should be placed in a separate Developer Lab instead of cluttering the normal chat screen.
-
-### Native layer
-
-- C++17 implementation.
-- Byte-level BPE tokenizer.
-- Decoder-only Transformer reference implementation.
-- Planned loss, gradients, optimizer, checkpoint reader/writer, and generation loop.
-
-## 5. Training roadmap
-
-The training pipeline must be implemented in verifiable stages:
-
-1. **Data preparation:** validate records, preserve language labels, deduplicate, track provenance, and create deterministic train/validation splits.
-2. **Tokenization:** persist the vocabulary and merges; add special tokens for message roles and sequence boundaries.
-3. **Loss:** implement numerically stable causal next-token cross-entropy.
-4. **Backpropagation:** calculate and test gradients through embeddings, normalization, attention, feed-forward layers, and output projection.
-5. **Optimization:** implement AdamW, gradient clipping, deterministic batching, and finite-value checks.
-6. **Checkpointing:** save and reload model parameters, optimizer state, tokenizer identity, configuration, seed, and training metadata.
-7. **Evaluation:** report training and held-out validation loss separately; test multilingual and multi-turn prompts.
-8. **Generation:** implement autoregressive token sampling from a verified learned checkpoint.
-9. **Android integration:** add chat UI, cancellation, streaming output, and lifecycle-safe native inference.
-
-A training milestone is complete only when its tests and metrics are recorded. Merely adding examples to a JSONL file does not train the model.
-
-## 6. Knowledge and conversation data
-
-The repository currently has a **210-record starter corpus** across English, Hindi, and Urdu. The Android prototype packages these prompt/response pairs and builds an in-memory retrieval index locally at startup. It is intended for schema, tokenizer, and pipeline experiments—not for creating a capable general-purpose assistant.
-
-A separate target of **200,000 conversation records** is documented as a future data goal. Those records are not currently present. The corpus must grow through reviewed, useful batches rather than repeated or fabricated filler.
-
-Planned subject coverage includes:
-
-- Everyday conversation, greetings, humor, and social communication.
-- Language, writing, explanations, and translation.
-- Mathematics, science, computing, and technology.
-- History, geography, culture, and society.
-- Practical problem solving and decision-making.
-- Critical thinking, uncertainty, and source evaluation.
-- Multi-turn dialogue, follow-up questions, corrections, and context retention.
-- Creative collaboration and respectful disagreement.
-
-Each record should be clear, useful, age-appropriate, correctly labeled, and checked for duplicates and factual reliability. Data provenance and licensing must be recorded. Validation examples must never be included in optimizer batches.
-
-### Dataset tools
+The official LiteRT-LM C API Android runtime is downloaded during the build and its release archive is SHA-256 verified. It is not committed as a large binary into this repository.
 
 ```bash
-python3 scripts/validate_knowledge_dataset.py
-python3 scripts/prepare_dataset.py --seed 2026
-python3 -m unittest discover -s tests -p 'test_*.py'
+bash scripts/prepare_litertlm_android.sh
+gradle --no-daemon :app:assembleDebug
 ```
 
-## 7. Quality and evaluation principles
+The SDK preparation script expects `curl`, `unzip`, and `sha256sum`. The APK build targets arm64-v8a only.
 
-Dev Orus should eventually be evaluated on more than memorized facts.
-
-- **Intent:** distinguish questions, requests, explanations, creative tasks, and casual conversation.
-- **Context:** understand references to earlier turns and user corrections.
-- **Language:** handle English, Hindi, and Urdu distinctly; evaluate code-switching separately.
-- **Clarity:** provide useful explanations at an appropriate level of detail.
-- **Reliability:** say when information is uncertain or unavailable instead of inventing facts.
-- **Safety:** avoid harmful instructions and respond appropriately to sensitive situations.
-- **Consistency:** compare behavior across repeated prompts and checkpoint versions.
-
-Publish measurable results: dataset version, token count, training steps, train loss, validation loss, parameter count, elapsed time, hardware, and checkpoint hash. Do not claim universal knowledge or ChatGPT-level performance.
-
-## 8. Continuous and resumable training
-
-The goal is to make Dev Orus trainable in repeated, bounded sessions. Each run should resume from the latest verified checkpoint and save a new checkpoint with its metadata.
-
-Training must not be described as running continuously when no job is active. A future scheduled workflow may run only after the training engine, data safeguards, resource limits, checkpoint recovery, and evaluation gates are implemented. No unbounded workflow loops should be used.
-
-## 9. Android device goals
-
-Initial Android target:
-
-- ABI: `arm64-v8a`
-- Minimum API: 27
-- UI: Java + XML
-- Native core: C++17 through JNI
-- Operation: local/offline after model files are installed
-
-The Redmi 9 Power is an intended test device. Actual performance, memory consumption, sustained speed, battery use, and thermal behavior must be measured on physical hardware. CI compilation alone does not prove device compatibility.
-
-## 10. Repository structure
+## Repository layout
 
 ```text
 DevAI/
-├── app/
-│   └── src/main/
-│       ├── java/com/devai/       # Android Java entry point
-│       ├── res/layout/           # XML interface
-│       └── cpp/                  # C++ tokenizer, Transformer, JNI
-├── data/knowledge/               # Starter JSONL dataset
-├── docs/                          # Architecture, quality, and corpus plans
-├── scripts/                       # Dataset validation and preparation
-├── tests/                         # Native and Python tests
-└── .github/workflows/             # CI and Android build workflows
+├── app/src/main/java/com/devai/       # Java activity and model lifecycle
+├── app/src/main/res/layout/           # XML chat UI
+├── app/src/main/cpp/                  # JNI bridge, tokenizer, Transformer
+├── scripts/prepare_litertlm_android.sh # Verified native runtime setup
+└── .github/workflows/                 # Android APK and native test workflows
 ```
 
-## 11. Build environment
+## Important limitations
 
-The current Android project configuration targets:
+- The first model download is large and requires a stable connection and sufficient free storage.
+- Model initialization and generation speed depend on the phone's CPU, RAM, thermal limits, and Android build. CI compilation does not prove performance on every device.
+- This release configures the CPU backend for broad device compatibility. GPU/NPU acceleration is not enabled in this integration.
+- The current chat is text-first. General file attachments, document parsing, image generation, and multi-format file creation are not included in this release.
+- The app does not train Gemma weights on the phone. The active language-generation engine uses the downloaded pretrained Gemma model.
+- No hosted inference API or paid API key is required.
 
-- JDK 17
-- Android SDK Platform 35
-- Android Gradle Plugin 8.6.1
-- Android NDK
-- CMake 3.22.1
-- arm64-v8a
+## Project integrity
 
-A local Android build requires the matching SDK/NDK components. Check the workflow logs and APK artifact before considering a build successful.
+The product name Dev Orus 1.1 does not change the identity or provenance of the underlying Gemma model. Model attribution is retained here so users can distinguish the assistant experience from the model provider. Do not describe this release as an independently trained original Dev Orus neural model.
 
-## 12. Roadmap
-
-- [x] Android Java/XML project foundation.
-- [x] C++17 native library and JNI bridge.
-- [x] Experimental byte-level BPE tokenizer.
-- [x] Tiny decoder-only Transformer forward pass.
-- [x] Initial native correctness tests.
-- [x] Starter multilingual knowledge/conversation corpus.
-- [x] Dataset validation and deterministic split preparation.
-- [ ] Persist tokenizer vocabulary and merges.
-- [ ] Implement causal loss and complete backpropagation.
-- [ ] Implement AdamW and gradient clipping.
-- [ ] Add reproducible training and validation runs.
-- [ ] Save/load versioned model and optimizer checkpoints.
-- [ ] Train the first Dev Orus 1.1 checkpoint and publish real metrics.
-- [ ] Add autoregressive generation.
-- [x] Build an initial chat-first Android interface.\n- [x] Add an offline corpus-trained retrieval baseline.\n- [ ] Replace retrieval-only answers with a trained neural generative model.
-- [ ] Add a separate Developer Lab and model status panel.
-- [ ] Profile and test on the Redmi 9 Power.
-- [ ] Expand the reviewed multilingual conversation corpus.
-
-## 13. Transparency and limitations
-
-DevAI is an active research project. It is not currently a trained general-purpose assistant. The current chat baseline is limited retrieval, not a generative neural model. A genuinely trainable neural model still requires tested loss/gradient code, optimization, checkpointing, generation, and evaluation. Useful language ability requires more high-quality data, correct training code, sufficient compute, and repeated evaluation.
-
-Do not interpret the model name or version label as proof of a trained release. Version 1.1 is the chosen project identity; model checkpoints and capability milestones will be versioned separately when they exist.
-
-## 14. Contributing and development discipline
-
-Changes should be focused, testable, and documented. For each feature:
-
-1. State the behavior and acceptance criteria.
-2. Implement the smallest coherent change.
-3. Add or update tests.
-4. Run relevant checks and inspect their results.
-5. Record known limitations.
-6. Never report an unverified build, test, or training run as successful.
-
-## 15. License
-
-No repository-wide license has been selected yet. Until a license file is added, this repository does not grant permission to reuse or redistribute its contents.
+---
